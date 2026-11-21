@@ -1,0 +1,1 @@
+MCP 写入链路自检：这条提交由 DSH 的 GitHub MCP 工具 push_files 生成，用于验证多文件提交能力。
