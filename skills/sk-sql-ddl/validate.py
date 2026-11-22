@@ -94,6 +94,31 @@ def check_sql(sql: str) -> list[str]:
         errs.append("括号不配平")
     if "STORED AS" not in upper:
         errs.append("必须显式 STORED AS")
+    errs += check_partition_not_in_columns(body)
+    return errs
+
+
+def check_partition_not_in_columns(body: str) -> list[str]:
+    """分区列不能同时出现在普通列定义里。
+
+    这条规则是从 runs/20261122-02 的双轨比对里长出来的：track-2 的
+    `dws_user_tag_df` 把 dt 既写成普通列又写进 PARTITIONED BY，Hive 建表
+    直接报错，但契约检查（--input 模式）才管，纯 SQL 模式漏了。
+    """
+    errs: list[str] = []
+    m = re.search(r"PARTITIONED\s+BY\s*\(([^)]*)\)", body, re.IGNORECASE)
+    if not m:
+        return errs
+    part_names = {
+        part.strip().split()[0].lower()
+        for part in m.group(1).split(",")
+        if part.strip()
+    }
+    head = body[: m.start()]
+    for ln in head.splitlines():
+        hit = re.match(r"^\s{2,}([a-z][a-z0-9_]*)\s+[A-Za-z]", ln)
+        if hit and hit.group(1).lower() in part_names:
+            errs.append(f"分区列 {hit.group(1)} 同时出现在列定义里，Hive 会报重复列")
     return errs
 
 

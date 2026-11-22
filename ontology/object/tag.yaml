@@ -1,0 +1,13 @@
+id: TAG
+name: 画像标签
+description: 贴在用户身上的一个可枚举/可比较的属性。标签只描述状态，不描述过程；每个标签必须有唯一 tag_code、明确的值域和责任人
+grain: 标签
+keys: [tag_code]
+attributes:
+  - tag_code
+  - tag_name
+  - tag_category
+  - value_type
+  - value_domain
+owner: ontology-admin
+status: draft

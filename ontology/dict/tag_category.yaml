@@ -1,0 +1,6 @@
+id: TAG_CATEGORY
+name: 标签大类
+description: 标签的一级分类。基础画像描述"用户是谁"，购买行为画像描述"用户买得怎么样"；两类标签的更新频率和责任方都不同
+values: [basic, purchase]
+owner: ontology-admin
+status: draft

@@ -9,6 +9,11 @@
  *
  * 用法：
  *   GITHUB_TOKEN=xxx node tools/push_batch.mjs "提交信息" README.md knowledge/wiki/README.md
+ *   GITHUB_TOKEN=xxx node tools/push_batch.mjs --msg-file .tmp/msg.txt --files-from .tmp/files.txt
+ *
+ * 为什么有 --msg-file / --files-from：本机 PowerShell 的 Start-Process 会按空格
+ * 重切参数，中文提交信息（含空格与换行）和长文件清单都会被拆坏。
+ *
  * 环境变量：
  *   GITHUB_TOKEN   必填，classic PAT（repo scope）
  *   GITHUB_REPO    默认 nino-laiqiu/data-warehouse-workflow
@@ -19,7 +24,24 @@ import { readFile } from 'node:fs/promises';
 const REPO = process.env.GITHUB_REPO || 'nino-laiqiu/data-warehouse-workflow';
 const BRANCH = process.env.GITHUB_BRANCH || 'main';
 const TOKEN = process.env.GITHUB_TOKEN;
-const [message, ...files] = process.argv.slice(2);
+
+const argv = process.argv.slice(2);
+function takeFlag(name, takesValue) {
+  const i = argv.indexOf(name);
+  if (i < 0) return undefined;
+  const val = takesValue ? argv[i + 1] : true;
+  argv.splice(i, takesValue ? 2 : 1);
+  return val;
+}
+const msgFile = takeFlag('--msg-file', true);
+const filesFile = takeFlag('--files-from', true);
+
+const message = msgFile
+  ? (await readFile(msgFile, 'utf8')).trim()
+  : argv[0];
+const files = filesFile
+  ? (await readFile(filesFile, 'utf8')).split(/\r?\n/).map((s) => s.trim()).filter(Boolean)
+  : argv.slice(1);
 
 const API = `https://api.github.com/repos/${REPO}`;
 

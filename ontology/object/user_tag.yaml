@@ -1,0 +1,13 @@
+id: USER_TAG
+name: 用户标签值
+description: 某天某用户某标签的取值。粒度是 用户 × 标签 × 日，因此同一用户一天有多行；标签缺失必须落 UNKNOWN，不能留空，否则下游圈人会静默漏人
+grain: 用户 × 标签 × 日
+keys: [user_id, tag_code, dt]
+attributes:
+  - user_id
+  - tag_code
+  - tag_value
+  - tag_category
+  - dt
+owner: ontology-admin
+status: draft
