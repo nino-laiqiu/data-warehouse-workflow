@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "journal_entry.schema.json",
   "title": "journal_entry",
-  "description": "追踪者写入 runs/<run_id>/journal.jsonl 的一条事件。一行一个 JSON。",
+  "description": "追踪者写入 requirements/<需求目录>/需求开发员/journal.jsonl 的一条事件。一行一个 JSON。",
   "type": "object",
   "additionalProperties": false,
   "required": ["ts", "run_id", "type", "actor"],

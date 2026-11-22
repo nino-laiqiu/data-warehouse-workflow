@@ -1,7 +1,7 @@
 ---
 role: chronicler
 model: default
-can_write: [runs/<run_id>/journal.jsonl]
+can_write: [requirements/<需求目录>/需求开发员/journal.jsonl]
 reads: [全部]
 mounted_skills: []
 gates: []

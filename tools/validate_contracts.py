@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """契约校验：用标准库实现 JSON Schema 的一个子集。
 
-    python tools/validate_contracts.py runs/<run_id>/            # 校验整个目录
+    python tools/validate_contracts.py requirements/<需求目录>/需求开发员/            # 校验整个目录
     python tools/validate_contracts.py doc.json --schema contracts/intent.schema.json
     python tools/validate_contracts.py doc.json --schema contracts/intent.schema.json --json
     python tools/validate_contracts.py journal.jsonl --schema contracts/journal_entry.schema.json --lines

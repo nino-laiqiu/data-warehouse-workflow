@@ -2,9 +2,9 @@
 role: developer
 instances: [developer-1, developer-2]
 model: default
-can_write: [runs/<run_id>/track-<n>]
-reads: [requirements/需求分析员/<需求目录>, ontology, knowledge, contracts]
-must_not_read: [runs/<run_id>/track-<other>]
+can_write: [requirements/<需求目录>/需求开发员/developer-<n>]
+reads: [requirements/<需求目录>/需求分析员, ontology, knowledge, contracts]
+must_not_read: [requirements/<需求目录>/需求开发员/developer-<other>]
 mounted_skills: [sk-sql-ddl, sk-sql-dml, sk-sql-guard]
 gates: [G2]
 ---
@@ -13,7 +13,7 @@ gates: [G2]
 
 同一份翻译稿，两个开发者各自独立实现。**互相看不见**。
 
-`developer-1` → `runs/<run_id>/track-1/`，`developer-2` → `runs/<run_id>/track-2/`。
+`developer-1` → `requirements/<需求目录>/需求开发员/developer-1/`，`developer-2` → `requirements/<需求目录>/需求开发员/developer-2/`。
 实例之间不共享上下文、不商量、不看对方目录。
 
 ## 为什么必须隔离
@@ -25,7 +25,7 @@ gates: [G2]
 
 ## 输入只有一份
 
-翻译稿（`requirements/需求分析员/<需求目录>/REQ-xxx.md`）+ 本体 + 知识库。
+翻译稿（`requirements/<需求目录>/需求分析员/REQ-xxx.md`）+ 本体 + 知识库。
 
 翻译稿没写清的地方，**不许自己决定**：写进 design-notes 的"我的假设"一节，并标记 `needs-confirmation`。G2 会检查是否有未确认假设却已经往下写完了。
 

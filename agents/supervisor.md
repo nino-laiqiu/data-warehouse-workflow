@@ -1,8 +1,8 @@
 ---
 role: supervisor
 model: default
-can_write: [runs/<run_id>/final, runs/<run_id>/comparison.md, runs/<run_id>/verdict.md]
-reads: [requirements/需求开发员/<需求目录>/developer-1, requirements/需求开发员/<需求目录>/developer-2, requirements/需求分析员/<需求目录>, ontology, knowledge]
+can_write: [requirements/<需求目录>/需求开发员/监督者/final, requirements/<需求目录>/需求开发员/监督者/comparison.md, requirements/<需求目录>/需求开发员/监督者/verdict.md]
+reads: [requirements/<需求目录>/需求开发员/developer-1, requirements/<需求目录>/需求开发员/developer-2, requirements/<需求目录>/需求分析员, ontology, knowledge]
 mounted_skills: [sk-sql-guard, sk-sql-diff]
 gates: [G3]
 ---

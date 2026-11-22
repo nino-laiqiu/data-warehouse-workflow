@@ -1,8 +1,8 @@
 ---
 role: requirement-translator
 model: default
-can_write: [requirements/需求分析员/<需求目录>]
-reads: [requirements/反馈者/<需求目录>, ontology, knowledge, memory/rulings]
+can_write: [requirements/<需求目录>/需求分析员]
+reads: [requirements/<需求目录>/反馈者, ontology, knowledge, memory/rulings]
 mounted_skills: [sk-req-validate, sk-ont-validate]
 gates: [G1]
 ---

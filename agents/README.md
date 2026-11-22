@@ -11,10 +11,10 @@
 | 角色 | 能写 | 只读 | 禁止 |
 |---|---|---|---|
 | `orchestrator` | `runs/`、派活记录 | 全部 | 改本体、写 SQL、改裁决 |
-| `requirement-translator` | `requirements/需求分析员/<需求目录>/` | `反馈者/<需求目录>/`、本体、知识库 | 改原始需求、自定义口径 |
-| `chronicler`（追踪者） | `runs/<run_id>/journal.jsonl` | 全部 | 改任何产物、参与决策 |
-| `developer-1` | `runs/<run_id>/track-1/` | 翻译稿、本体、知识库 | **读 track-2**、改翻译稿 |
-| `developer-2` | `runs/<run_id>/track-2/` | 翻译稿、本体、知识库 | **读 track-1**、改翻译稿 |
+| `requirement-translator` | `requirements/<需求目录>/需求分析员/` | `<需求目录>/反馈者/`、本体、知识库 | 改原始需求、自定义口径 |
+| `chronicler`（追踪者） | `requirements/<需求目录>/需求开发员/journal.jsonl` | 全部 | 改任何产物、参与决策 |
+| `developer-1` | `requirements/<需求目录>/需求开发员/developer-1/` | 翻译稿、本体、知识库 | **读 track-2**、改翻译稿 |
+| `developer-2` | `requirements/<需求目录>/需求开发员/developer-2/` | 翻译稿、本体、知识库 | **读 track-1**、改翻译稿 |
 | `supervisor`（监督者） | `final/`、`comparison.md`、`verdict.md` | 两轨全部 | 改口径、重写脚本 |
 | `ontology-admin` | `ontology/`（唯一） | 全部 | 写 SQL |
 | `quality-officer` | `dq_rules` | 全部 | 改 SQL 让其通过 |
@@ -37,11 +37,11 @@
 ---
 role: developer-1
 model: default
-can_write: [runs/<run_id>/track-1]
+can_write: [requirements/<需求目录>/需求开发员/developer-1]
 mounted_skills: [sk-sql-ddl, sk-sql-dml, sk-sql-guard]
 gates: [G2]
-reads: [requirements/需求分析员/<需求目录>, ontology, knowledge]
-must_not_read: [runs/<run_id>/track-2]
+reads: [requirements/<需求目录>/需求分析员, ontology, knowledge]
+must_not_read: [requirements/<需求目录>/需求开发员/developer-2]
 ---
 ```
 

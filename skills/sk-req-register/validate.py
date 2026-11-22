@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""sk-req-register 的门禁（G0）：对账 反馈者/ 下的原始需求与登记簿。
+"""sk-req-register 的门禁（G0）：对账 requirements/ 下的原始需求与登记簿。
 
     python skills/sk-req-register/validate.py
     python skills/sk-req-register/validate.py --json
 
 只读，不修改任何文件。检查五件事：
-  1. 每个 REQ-*.md 都在 反馈者/<需求目录>/ 下（不许平铺）
+  1. 每个 REQ-*.md 都在 <需求目录>/反馈者/ 下（不许平铺）
   2. 每个 REQ-*.md 都登记过
   3. 登记时的 sha256 与当前文件一致（发现原件被改）
   4. 登记簿里的路径都真实存在
@@ -25,7 +25,7 @@ import register as reg  # noqa: E402  同目录复用模板检查与 hash 逻辑
 def main(argv: list[str]) -> int:
     as_json = "--json" in argv
     root = reg.repo_root()
-    inbox = root / reg.FEEDBACK_REL
+    inbox = root / reg.REQ_ROOT_REL
     registry_path = root / reg.REGISTRY_REL
 
     errors: list[str] = []
@@ -49,12 +49,26 @@ def main(argv: list[str]) -> int:
             errors.append(f"登记簿条目缺字段 {missing}: {r.get('req_id', '?')}")
         by_path[r.get("path")] = r
 
-    files = sorted(p for p in inbox.rglob("REQ-*.md") if p.is_file())
+    files = []
+    for p in sorted(inbox.rglob("REQ-*.md")):
+        if not p.is_file():
+            continue
+        rel = p.resolve().relative_to(root.resolve()).as_posix()
+        parts = p.relative_to(inbox).parts
+        if parts[0] == "templates":
+            continue                      # 模板不是需求
+        if p.parent.name == "需求分析员":
+            continue                      # 翻译稿不是原件，归 G1 管
+        if p.parent.name != "反馈者":
+            errors.append(f"目录不合规: {rel} —— 原始需求必须在 <需求目录>/反馈者/ 下，不允许平铺")
+            continue
+        if len(parts) != 3:
+            errors.append(f"目录不合规: {rel} —— 原始需求必须在 <需求目录>/反馈者/ 下，不允许平铺")
+            continue
+        files.append(p)
+
     for f in files:
         rel = f.resolve().relative_to(root.resolve()).as_posix()
-        depth = len(f.resolve().relative_to(inbox.resolve()).parts)
-        if depth != 2:
-            errors.append(f"目录不合规: {rel} —— 原始需求必须在 反馈者/<需求目录>/ 下，不允许平铺")
         row = by_path.get(rel)
         if not row:
             errors.append(f"未登记: {rel}（跑 register.py 登记后 G0 才过）")

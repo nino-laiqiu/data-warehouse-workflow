@@ -101,7 +101,7 @@ def check_sql(sql: str) -> list[str]:
 def check_partition_not_in_columns(body: str) -> list[str]:
     """分区列不能同时出现在普通列定义里。
 
-    这条规则是从 runs/20261122-02 的双轨比对里长出来的：track-2 的
+    这条规则是从 画像标签需求20261122 的双轨比对里长出来的：track-2 的
     `dws_user_tag_df` 把 dt 既写成普通列又写进 PARTITIONED BY，Hive 建表
     直接报错，但契约检查（--input 模式）才管，纯 SQL 模式漏了。
     """

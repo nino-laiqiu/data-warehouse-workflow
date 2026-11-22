@@ -20,7 +20,7 @@
         "requirement_id": {
           "type": "string",
           "minLength": 1,
-          "description": "对应 requirements/需求分析员/<需求目录>/ 里的需求编号"
+          "description": "对应 requirements/<需求目录>/需求分析员/ 里的需求编号"
         },
         "differences": {
           "type": "array",

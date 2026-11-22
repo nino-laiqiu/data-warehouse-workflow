@@ -30,7 +30,7 @@
 ## 校验
 
 ```bash
-python tools/validate_contracts.py runs/<run_id>/
+python tools/validate_contracts.py requirements/<需求目录>/需求开发员/
 ```
 
 门禁不通过时，编排器不得进入下一阶段——这条没有例外，也没有"先跑起来再说"。

@@ -8,7 +8,7 @@ owner: requirement-translator
 
 ## 这是什么
 
-检查 `requirements/需求分析员/<需求目录>/REQ-*.md` 是否满足"两个开发者可以独立开工且不会理解分歧"。
+检查 `requirements/<需求目录>/需求分析员/REQ-*.md` 是否满足"两个开发者可以独立开工且不会理解分歧"。
 
 **不是**什么：不翻译需求、不改文档、不评判需求价值。它只做一件事——**把"还能不能往下走"变成一个可以用脚本回答的问题**。
 
@@ -21,10 +21,10 @@ P2 是双轨开发，成本 ×2。一旦带着歧义进 P2，两条轨会各自�
 ## 输入
 
 ```bash
-python skills/sk-req-validate/validate.py --doc requirements/需求分析员/渠道GMV日报需求20261122/REQ-20261122-01.md
+python skills/sk-req-validate/validate.py --doc requirements/渠道GMV日报需求20261122/需求分析员/REQ-20261122-01.md
 ```
 
-可选 `--registry` 指定登记簿（默认 `requirements/反馈者/_registry.jsonl`）。
+可选 `--registry` 指定登记簿（默认 `requirements/_registry.jsonl`）。
 
 ## 检查六件事
 

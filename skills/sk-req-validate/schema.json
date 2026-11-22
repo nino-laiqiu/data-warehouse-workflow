@@ -7,12 +7,12 @@
   "properties": {
     "doc_path": {
       "type": "string",
-      "pattern": "^requirements/需求分析员/[^/]+/REQ-\\d{8}-\\d{2}(-v\\d+)?\\.md$",
+      "pattern": "^requirements/[^/]+/需求分析员/REQ-\\d{8}-\\d{2}(-v\\d+)?\\.md$",
       "description": "翻译稿路径"
     },
     "registry_path": {
       "type": "string",
-      "description": "可选，默认 requirements/反馈者/_registry.jsonl"
+      "description": "可选，默认 requirements/_registry.jsonl"
     }
   }
 }

@@ -3,7 +3,7 @@
 | 字段 | 值 |
 |---|---|
 | 需求编号 | REQ-YYYYMMDD-NN |
-| 原始需求 | `requirements/反馈者/<需求目录>/REQ-YYYYMMDD-NN.md` |
+| 原始需求 | `requirements/<需求目录>/反馈者/REQ-YYYYMMDD-NN.md` |
 | 原始需求 sha256 | `（从 _registry.jsonl 抄，不要手算）` |
 | 翻译者 | requirement-translator |
 | 版本 | v1 |

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""sk-req-register：把原始需求登记进 requirements/反馈者/_registry.jsonl。
+"""sk-req-register：把原始需求登记进 requirements/_registry.jsonl。
 
     python skills/sk-req-register/register.py \
-        --path requirements/反馈者/渠道GMV日报需求20261122/REQ-20261122-01.md \
+        --path requirements/画像标签需求20261122/反馈者/REQ-20261122-02.md \
         --proposer 张敏 --channel "钉钉「数据需求」群" --submitted-at "2026-11-22 10:12"
 
-原始需求必须放在 requirements/反馈者/<需求目录>/ 下，<需求目录> 形如「画像标签需求20261122」。
-平铺在 requirements/ 或 反馈者/ 根下会被拒绝——目录就是需求的身份。
+原始需求必须放在 requirements/<需求目录>/反馈者/ 下，<需求目录> 形如「画像标签需求20261122」。
+平铺在 requirements/ 根下或塞进别的地方会被拒绝——目录就是需求的身份。
 
 纯标准库。幂等：同路径同 hash 重复登记不会重复写行。
 同路径 hash 不同 → 拒绝登记（原件可能被改过，要求另存 -v2）。
@@ -31,8 +31,9 @@ REQUIRED_SECTIONS = ["原始描述", "需求方想要的数", "提到的业务�
 # 来源三要素
 REQUIRED_META = ["提出人", "渠道", "提出时间"]
 
-REGISTRY_REL = "requirements/反馈者/_registry.jsonl"
-FEEDBACK_REL = "requirements/反馈者"
+REGISTRY_REL = "requirements/_registry.jsonl"
+REQ_ROOT_REL = "requirements"
+ROLES = ["反馈者", "需求分析员", "需求开发员"]
 CST = timezone(timedelta(hours=8))
 
 
@@ -109,12 +110,12 @@ def section_body(text: str, num: int) -> str:
 
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(description="原始需求入库登记")
-    ap.add_argument("--path", required=True, help="requirements/反馈者/<需求目录>/REQ-*.md")
+    ap.add_argument("--path", required=True, help="requirements/<需求目录>/反馈者/REQ-*.md")
     ap.add_argument("--proposer", required=True)
     ap.add_argument("--channel", required=True)
     ap.add_argument("--submitted-at", required=True, dest="submitted_at")
     ap.add_argument("--title")
-    ap.add_argument("--registry", default=None, help="默认 requirements/反馈者/_registry.jsonl")
+    ap.add_argument("--registry", default=None, help="默认 requirements/_registry.jsonl")
     ap.add_argument("--dry-run", action="store_true", help="只检查不写登记簿")
     args = ap.parse_args(argv)
 
@@ -133,13 +134,14 @@ def main(argv: list[str]) -> int:
                          ensure_ascii=False, indent=2))
         return 1
 
-    # 目录即身份：必须落在 requirements/反馈者/<需求目录>/ 下
+    # 目录即身份：必须落在 requirements/<需求目录>/反馈者/ 下
     layout_errs = []
-    req_dir = path.resolve().parent.name
-    parent_rel = path.resolve().parent.relative_to(root.resolve()).as_posix()
-    if not re.fullmatch(rf"{FEEDBACK_REL}/[^/]+", parent_rel):
+    parent = path.resolve().parent
+    req_dir = parent.parent.name
+    parent_rel = parent.relative_to(root.resolve()).as_posix()
+    if parent.name != "反馈者" or not re.fullmatch(rf"{REQ_ROOT_REL}/[^/]+/反馈者", parent_rel):
         layout_errs.append(
-            f"原始需求必须放在 {FEEDBACK_REL}/<需求目录>/ 下，实际在 {parent_rel}/"
+            f"原始需求必须放在 {REQ_ROOT_REL}/<需求目录>/反馈者/ 下，实际在 {parent_rel}/"
         )
     if not REQ_DIR_RE.fullmatch(req_dir):
         layout_errs.append(
