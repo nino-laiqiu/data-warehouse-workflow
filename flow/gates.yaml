@@ -55,6 +55,7 @@ lane_b:
   - id: G4
     name: 质量规则就绪
     type: auto
+    check: python tools/check_dq.py requirements/<需求目录>/需求开发员/质量/dq_rules.json
     checks:
       - 每条 DQ 规则可执行（有 SQL 或断言），不允许"人工检查"
       - 至少覆盖空值、重复、单调性三类
@@ -64,6 +65,7 @@ lane_b:
     name: 上线放行
     type: hitl
     hitl: H3 上线放行
+    check: python tools/check_lineage.py requirements/<需求目录>/需求开发员/血缘/lineage.json
     checks:
       - 血缘图完整，无孤立表
       - 调度依赖已声明，且不形成环

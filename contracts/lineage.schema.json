@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "lineage.schema.json",
+  "title": "lineage",
+  "description": "P5 血缘与调度的产物：表级血缘图 + 调度依赖 + 回滚方案。G5 要求无孤立表、依赖不成环。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "stage", "payload"],
+  "properties": {
+    "run_id": { "type": "string", "minLength": 1 },
+    "stage": { "enum": ["P5"] },
+    "payload": { "$ref": "#/definitions/payload" }
+  },
+  "definitions": {
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requirement_id", "nodes", "edges", "schedule", "rollback"],
+      "properties": {
+        "requirement_id": { "type": "string", "minLength": 1 },
+        "nodes": { "type": "array", "minItems": 2, "items": { "$ref": "#/definitions/node" } },
+        "edges": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/edge" } },
+        "schedule": { "$ref": "#/definitions/schedule" },
+        "rollback": { "$ref": "#/definitions/rollback" },
+        "sources": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "允许没有上游的节点 id（外部源表），其余无上游节点视为孤立表"
+        },
+        "sinks": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "允许没有下游的节点 id（终端节点：ads 层表或终态任务，如质检）"
+        }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "layer"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "type": { "enum": ["table", "task"] },
+        "layer": { "enum": ["ods", "dwd", "dws", "ads", "dim", "task"] },
+        "owner": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to", "type"],
+      "properties": {
+        "from": { "type": "string", "minLength": 1 },
+        "to": { "type": "string", "minLength": 1 },
+        "type": {
+          "enum": ["data", "schedule"],
+          "description": "data=数据流；schedule=调度先后（判定成环只看 schedule）"
+        },
+        "note": { "type": "string" }
+      }
+    },
+    "schedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dag_id", "cron", "timezone", "retries", "owner"],
+      "properties": {
+        "dag_id": { "type": "string", "minLength": 1 },
+        "cron": { "type": "string", "minLength": 1 },
+        "timezone": { "type": "string", "minLength": 1 },
+        "retries": { "type": "integer" },
+        "retry_delay_minutes": { "type": "integer" },
+        "owner": { "type": "string" },
+        "catchup": { "type": "boolean" },
+        "sla_minutes": { "type": "integer" }
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "retention_days", "steps"],
+      "properties": {
+        "strategy": { "type": "string", "minLength": 1 },
+        "retention_days": { "type": "integer" },
+        "steps": { "type": "array", "minItems": 2, "items": { "type": "string" } }
+      }
+    }
+  }
+}

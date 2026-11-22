@@ -178,11 +178,18 @@ def main(argv: list[str]) -> int:
 
 
 def _guess_schema(doc_path: Path) -> Path | None:
-    """按文件名猜 schema：runs/<id>/intent.json → contracts/intent.schema.json。"""
+    """按文件名猜 schema：...,/dq_rules.json → contracts/dq_rules.schema.json。
+
+    先试全名（dq_rules / comparison_report 这类带下划线的契约名），
+    再退化成去掉最后一段（如 model_design_v2.json → model_design.schema.json）。
+    """
     name = doc_path.stem
+    direct = Path("contracts") / f"{name}.schema.json"
+    if direct.exists():
+        return direct
     if "_" in name:
         return Path("contracts") / f"{name.rsplit('_', 1)[0]}.schema.json"
-    return Path("contracts") / f"{name}.schema.json"
+    return direct
 
 
 if __name__ == "__main__":

@@ -84,13 +84,22 @@ python tools/check_skills.py
 
 # 7. 校验需求目录布局：三个角色目录同名、开发目录结构齐全、没有平铺
 python tools/check_layout.py
+
+# 8. G4：质量规则可执行（覆盖空值/重复/单调性、全部单条只读 SQL）
+python tools/check_dq.py requirements/画像标签需求20261122/需求开发员/质量/dq_rules.json
+
+# 9. G5：血缘无孤立节点、调度无环、回滚可执行
+python tools/check_lineage.py requirements/画像标签需求20261122/需求开发员/血缘/lineage.json
+
+# 10. 从 dq_rules.json 重新生成 dq_check.sql（规则改了就重跑，不手改 SQL）
+python tools/dq_to_sql.py requirements/画像标签需求20261122/需求开发员/质量/dq_rules.json
 ```
 
-八个校验器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
+十个校验器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
 
 ## 当前状态
 
-**v0.5 —— 需求按"角色目录 + 每需求子目录"组织，双轨制跑通第一个需求。**
+**v0.6 —— 需求优先的目录结构；一个需求从 P0 跑到 P6，电商域端到端闭环。**
 
 | 阶段 | 产出 | 状态 |
 |---|---|---|
@@ -100,8 +109,8 @@ python tools/check_layout.py
 | M2 角色与流程 | `requirements/` `agents/`(11 角色) `flow/`(P0–P6 / G0–G6) | ✅ 本版（双轨制） |
 | M2a A 线最小闭环 | `skills/sk-qry-*` | 未开始 |
 | M2b B 线 Skills | `skills/sk-req-*` `sk-sql-*` `sk-ont-validate` | 部分（已实现 sk-req-register / sk-req-validate / sk-sql-ddl） |
-| M3 契约落地 | `contracts/` 9 个 schema | 未开始（模板 + 2 个已写） |
-| M4 电商域闭环 | `requirements/画像标签需求20261122/需求开发员/` | P0–P3 已跑通（REQ-20261122-02） |
+| M3 契约落地 | `contracts/` 9 个 schema | 部分（模板 + 4 个：comparison_report / journal_entry / dq_rules / lineage） |
+| M4 电商域闭环 | `requirements/画像标签需求20261122/需求开发员/` | ✅ P0–P6 全跑通（REQ-20261122-02，H3 待人工放行） |
 
 先读设计文档第 7 章（两条流水线）。注意：第 9 章的端到端走查是用 Push 域写的（比电商复杂），
 本仓库的模板实现换成**电商交易域**——结构一样，但更适合当起点。

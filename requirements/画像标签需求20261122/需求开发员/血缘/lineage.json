@@ -1,0 +1,59 @@
+{
+  "run_id": "20261122-02",
+  "stage": "P5",
+  "payload": {
+    "requirement_id": "REQ-20261122-02",
+    "nodes": [
+      { "id": "dwd_pay_flow_di", "type": "table", "layer": "dwd", "owner": "交易域" },
+      { "id": "dwd_order_main_di", "type": "table", "layer": "dwd", "owner": "交易域" },
+      { "id": "dwd_order_item_di", "type": "table", "layer": "dwd", "owner": "交易域" },
+      { "id": "dim_user_df", "type": "table", "layer": "dim", "owner": "用户域" },
+      { "id": "dim_product_df", "type": "table", "layer": "dim", "owner": "商品域" },
+      { "id": "dim_tag_df", "type": "table", "layer": "dim", "owner": "数据治理", "note": "标签字典，列名与值域的唯一权威" },
+      { "id": "tag_dict_source", "type": "table", "layer": "ods", "owner": "数据治理", "note": "治理平台导出的标签字典配置（外部源，无上游）" },
+      { "id": "sync_dim_tag_df", "type": "task", "layer": "task", "owner": "数据治理" },
+      { "id": "etl_dws_user_profile_df", "type": "task", "layer": "task", "owner": "数仓开发" },
+      { "id": "dq_dws_user_profile_df", "type": "task", "layer": "task", "owner": "质量" },
+      { "id": "dws_user_profile_df", "type": "table", "layer": "dws", "owner": "数仓开发" },
+      { "id": "ads_user_segment", "type": "table", "layer": "ads", "owner": "运营平台", "note": "画像圈人，终端消费方" }
+    ],
+    "edges": [
+      { "from": "tag_dict_source", "to": "sync_dim_tag_df", "type": "data", "note": "字典配置导入" },
+      { "from": "sync_dim_tag_df", "to": "dim_tag_df", "type": "data", "note": "字典数据装载" },
+      { "from": "dim_user_df", "to": "etl_dws_user_profile_df", "type": "data", "note": "基础画像来源，取 rn=1 最新版本" },
+      { "from": "dim_product_df", "to": "etl_dws_user_profile_df", "type": "data", "note": "偏好品类要品类名" },
+      { "from": "dwd_pay_flow_di", "to": "etl_dws_user_profile_df", "type": "data", "note": "近30天GMV/首单/最近支付" },
+      { "from": "dwd_order_main_di", "to": "etl_dws_user_profile_df", "type": "data", "note": "订单状态过滤" },
+      { "from": "dwd_order_item_di", "to": "etl_dws_user_profile_df", "type": "data", "note": "偏好品类按明细金额汇总" },
+      { "from": "etl_dws_user_profile_df", "to": "dws_user_profile_df", "type": "data", "note": "INSERT OVERWRITE PARTITION(dt)" },
+      { "from": "dws_user_profile_df", "to": "dq_dws_user_profile_df", "type": "data", "note": "12 条断言" },
+      { "from": "dim_tag_df", "to": "dq_dws_user_profile_df", "type": "data", "note": "值域一致性" },
+      { "from": "dws_user_profile_df", "to": "ads_user_segment", "type": "data", "note": "圈人平台读宽表" },
+      { "from": "sync_dim_tag_df", "to": "etl_dws_user_profile_df", "type": "schedule", "note": "字典先落" },
+      { "from": "etl_dws_user_profile_df", "to": "dq_dws_user_profile_df", "type": "schedule", "note": "质检在 ETL 之后" }
+    ],
+    "sources": ["dwd_pay_flow_di", "dwd_order_main_di", "dwd_order_item_di", "dim_user_df", "dim_product_df", "tag_dict_source"],
+    "sinks": ["ads_user_segment", "dq_dws_user_profile_df"],
+    "schedule": {
+      "dag_id": "profile_dws_user_profile_df",
+      "cron": "0 3 * * *",
+      "timezone": "Asia/Shanghai",
+      "retries": 2,
+      "retry_delay_minutes": 10,
+      "owner": "data-eng",
+      "catchup": false,
+      "sla_minutes": 90
+    },
+    "rollback": {
+      "strategy": "分区级回滚：保留最近 7 个 dt 分区，出问题只回退当天分区，不重建全表",
+      "retention_days": 7,
+      "steps": [
+        "确认异常分区：SELECT dt, COUNT(1) FROM dws_user_profile_df GROUP BY dt ORDER BY dt DESC LIMIT 7",
+        "恢复上游：重跑当日 dwd_pay_flow_di / dwd_order_item_di 对应分区（若上游本身错）",
+        "重跑本表：hive -hivevar dt=<当日> -f 03_etl_dws_user_profile_df.sql —— INSERT OVERWRITE 天然覆盖，无需先删分区",
+        "重跑质检：hive -hivevar dt=<当日> -f dq_check.sql，逐条确认返回 0",
+        "若上游短期不可修：把该分区降级为 UNKNOWN 快照（只保留 user_id + basic_*），并通知圈人平台当日不要用购买类标签"
+      ]
+    }
+  }
+}

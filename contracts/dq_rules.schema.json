@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "dq_rules.schema.json",
+  "title": "dq_rules",
+  "description": "P4 质量规则的产物：每条规则都必须可执行（assert_sql 或 rerun 断言），不接受「人工检查」。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "stage", "payload"],
+  "properties": {
+    "run_id": { "type": "string", "minLength": 1 },
+    "stage": { "enum": ["P4"] },
+    "payload": { "$ref": "#/definitions/payload" }
+  },
+  "definitions": {
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requirement_id", "targets", "rules"],
+      "properties": {
+        "requirement_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "对应 requirements/<需求目录>/需求分析员/ 里的需求编号"
+        },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "被检查的表，必须来自 P3 final/"
+        },
+        "rules": {
+          "type": "array",
+          "minItems": 3,
+          "items": { "$ref": "#/definitions/rule" }
+        }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "category", "severity", "target", "assert_sql", "expect"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^DQ-[A-Z0-9_-]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "category": {
+          "enum": ["null", "unique", "domain", "range", "monotonic", "reconcile", "volume", "freshness"],
+          "description": "G4 要求 null / unique / monotonic 三类必须出现"
+        },
+        "severity": { "enum": ["block", "warn"] },
+        "target": { "type": "string", "minLength": 1 },
+        "assert_sql": {
+          "type": "string",
+          "minLength": 8,
+          "description": "单条只读 SELECT；返回 0 行 或 0 值 表示通过。用 ${dt} 占位分区"
+        },
+        "expect": { "$ref": "#/definitions/expect" },
+        "desc": { "type": "string" },
+        "on_fail": { "type": "string", "description": "失败后的动作：阻断下游 / 告警 / 标记待确认" }
+      }
+    },
+    "expect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "enum": ["zero_rows", "zero_value", "ratio_le", "min_rows", "rerun_equal"],
+          "description": "zero_rows=结果为空；zero_value=单值为0；ratio_le=比值不超过 value；min_rows=行数不少于 value；rerun_equal=重跑两次指纹一致"
+        },
+        "value": { "type": "number" }
+      }
+    }
+  }
+}

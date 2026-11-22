@@ -50,7 +50,7 @@ lane_b_develop:
     - id: P4
       name: 质量规则
       agent: quality-officer
-      skills: []
+      skills: [sk-dq-gen]
       in: final/ + metric_spec
       out: dq_rules
       gate: G4
@@ -58,7 +58,7 @@ lane_b_develop:
     - id: P5
       name: 血缘与调度
       agent: lineage-steward
-      skills: []
+      skills: [sk-lin-build]
       in: final/ + dq_rules
       out: lineage + dag
       gate: G5                # 含 HITL：H3 上线放行
@@ -66,7 +66,7 @@ lane_b_develop:
     - id: P6
       name: 文档交付
       agent: doc-writer
-      skills: []
+      skills: [sk-doc-assemble]
       in: 以上全部
       out: 交付文档 + 口径变更说明
       gate: G6
