@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "comparison_report.schema.json",
+  "title": "comparison_report",
+  "description": "P3 监督比对的产物：两轨差异、逐条裁决、合格版本清单。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "stage", "payload"],
+  "properties": {
+    "run_id": { "type": "string", "minLength": 1 },
+    "stage": { "enum": ["P3"] },
+    "payload": { "$ref": "#/definitions/payload" }
+  },
+  "definitions": {
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requirement_id", "differences", "verdict", "final_files"],
+      "properties": {
+        "requirement_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "对应 requirements/normalized/ 里的需求编号"
+        },
+        "differences": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/difference" },
+          "description": "两轨之间的全部差异，漏一条 G3 就失败"
+        },
+        "verdict": {
+          "type": "string",
+          "minLength": 1,
+          "description": "一句话结论：选了哪一轨 / 如何融合，以及为什么"
+        },
+        "final_files": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "final/ 下的脚本路径"
+        },
+        "changes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/change" },
+          "description": "对所选轨道做出的每一处改动，逐条记录"
+        }
+      }
+    },
+    "difference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "aspect", "track_a", "track_b", "basis", "decision"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "aspect": {
+          "enum": ["semantic", "structure", "implementation"],
+          "description": "semantic=口径 / structure=粒度键分区 / implementation=写法性能"
+        },
+        "track_a": { "type": "string", "minLength": 1 },
+        "track_b": { "type": "string", "minLength": 1 },
+        "basis": {
+          "type": "string",
+          "minLength": 1,
+          "description": "裁决依据：本体 id（如 GMV）或知识库条目；不接受'我觉得'"
+        },
+        "decision": {
+          "enum": ["a", "b", "merge"]
+        },
+        "note": { "type": "string" }
+      }
+    },
+    "change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "reason"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "from": { "enum": ["a", "b", "merge"] }
+      }
+    }
+  }
+}

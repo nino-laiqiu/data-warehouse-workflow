@@ -33,7 +33,7 @@ TYPES = {
 }
 
 SUPPORTED_KEYWORDS = {
-    "$schema", "$comment", "title", "description", "$ref", "definitions",
+    "$schema", "$comment", "$id", "title", "description", "$ref", "definitions",
     "type", "required", "properties", "additionalProperties", "enum",
     "pattern", "minLength", "minItems", "items",
 }

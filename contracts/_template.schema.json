@@ -7,7 +7,7 @@
   "required": ["run_id", "stage", "payload"],
   "properties": {
     "run_id": { "type": "string", "description": "runs/<run_id>/ 的目录名，全链路可追溯" },
-    "stage": { "type": "string", "enum": ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "A1", "A2", "A3", "A4", "A5", "A6"] },
+    "stage": { "type": "string", "enum": ["P0", "P1", "P2", "P3", "P4", "P5", "P6", "A1", "A2", "A3", "A4", "A5", "A6"], "description": "B 线 P0-P6 为双轨制重编号后的阶段；A 线仍为 A1-A6" },
     "produced_at": { "type": "string", "description": "ISO8601" },
     "producer": { "type": "string", "description": "agent 或 skill 的名字+版本" },
     "payload": { "type": "object" }

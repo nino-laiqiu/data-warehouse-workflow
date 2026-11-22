@@ -4,22 +4,30 @@
 
 ## 为什么要拆这么细
 
-如果同一个 agent 既写本体又审本体，它就有动机让自己的输出过关。所以写权限与审权限必须落在不同角色上。这是流程的信任基础，不是官僚主义。
+如果同一个 agent 既写 SQL 又评 SQL，它就有动机让自己的输出过关。B 线用**双轨制**把这件事做到极致：两个人独立做同一件事，再由第三人比对裁决。
 
-## 角色矩阵
+## 角色矩阵（11 个）
 
 | 角色 | 能写 | 只读 | 禁止 |
 |---|---|---|---|
-| `orchestrator` | `runs/`、`memory/` | 全部 | 改本体、写 SQL |
-| `req-analyst` | P1 需求单 | 本体、知识库 | 直接写 SQL |
-| `ontology-admin` | `ontology/`（唯一） | 全部 | 写 SQL、改知识库 |
-| `modeler` | P3 模型设计 | 本体、知识库 | 直接改本体（只能提 delta） |
-| `metric-admin` | P4 指标定义 | 本体、P3 | 自定义口径不落本体 |
-| `developer` | P5 SQL、P6 DQ | 本体、知识库、契约 | 改口径、改门禁 |
-| `quality-officer` | P6 规则、GA3 报告 | 全部 | 改 SQL 让其通过 |
-| `auditor` | 门禁报告 | 全部 | 任何写入 |
+| `orchestrator` | `runs/`、派活记录 | 全部 | 改本体、写 SQL、改裁决 |
+| `requirement-translator` | `requirements/normalized/` | `inbox/`、本体、知识库 | 改原始需求、自定义口径 |
+| `chronicler`（追踪者） | `runs/<run_id>/journal.jsonl` | 全部 | 改任何产物、参与决策 |
+| `developer-1` | `runs/<run_id>/track-1/` | 翻译稿、本体、知识库 | **读 track-2**、改翻译稿 |
+| `developer-2` | `runs/<run_id>/track-2/` | 翻译稿、本体、知识库 | **读 track-1**、改翻译稿 |
+| `supervisor`（监督者） | `final/`、`comparison.md`、`verdict.md` | 两轨全部 | 改口径、重写脚本 |
+| `ontology-admin` | `ontology/`（唯一） | 全部 | 写 SQL |
+| `quality-officer` | `dq_rules` | 全部 | 改 SQL 让其通过 |
+| `lineage-steward` | `lineage` | 全部 | 改调度依赖以外的东西 |
+| `doc-writer` | 交付文档 | 全部 | 改产物 |
+| `analyst-writer`（A 线） | 结论 | 查询结果 | 因果断言、改 SQL |
 
-关键约束：**只有 `ontology-admin` 写 `ontology/`**。建模师想加维度，提交 `ontology_delta`，由本体管理员评审合并。
+四条关键约束：
+
+1. **只有 `ontology-admin` 写本体**。别人有意见就提 `ontology_delta`。
+2. **双轨必须隔离**：`developer-1` 与 `developer-2` 互不可见。任何一方读取另一轨的目录视为违规，`chronicler` 会记录。
+3. **追踪者只写不判**：它记录一切，但不参与决策。让它评判，它就会记录对自己有利的版本。
+4. **监督者不改口径**：发现两边口径不一致，退回 P1 翻译，不许自己拍一个。
 
 ## 文件格式
 
@@ -27,17 +35,26 @@
 
 ```yaml
 ---
-role: modeler
+role: developer-1
 model: default
-can_write: [runs/P3_model_design]
-mounted_skills: [sk-sql-ddl]
+can_write: [runs/<run_id>/track-1]
+mounted_skills: [sk-sql-ddl, sk-sql-dml, sk-sql-guard]
 gates: [G2]
+reads: [requirements/normalized, ontology, knowledge]
+must_not_read: [runs/<run_id>/track-2]
 ---
 ```
 
-正文写：职责边界、输入输出、什么时候该停下问人（HITL）。
+正文写：职责边界、输入输出、什么时候该停下问人。
 
 ## 与 HITL 的关系
 
-全流程只有 3 个人工卡点：H1 口径确认（P4）、H2 建表评审（P3）、H3 上线放行（P7）。
+全流程只有 3 个人工卡点：
+
+| 卡点 | 位置 | 人在决定什么 |
+|---|---|---|
+| H1 口径确认 | P1 翻译完成 | "这个口径对吗" |
+| H2 方案裁决评审 | P3 比对完成 | "选 A 还是合，理由成立吗" |
+| H3 上线放行 | P5 血缘调度后 | "能不能上生产" |
+
 agent 不得自行增加卡点——卡点一多，人就绕开系统走了。

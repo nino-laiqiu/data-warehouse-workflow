@@ -1,5 +1,8 @@
 # 门禁定义。gate 在本文件里是"可执行的判定"，不是"评审意见"
-version: 1
+#
+# 约定：type: auto 的 gate 由脚本判；带 hitl 字段的 gate 还要人在场签字才能过。
+# 全流程只有 3 个 HITL：H1 口径确认（G1）、H2 方案裁决评审（G3）、H3 上线放行（G5）。
+version: 2
 
 principle:
   - 门禁只允许拦截，不允许自动修改产物
@@ -7,61 +10,57 @@ principle:
   - HITL 全局只有 3 个卡点，多一个就没人用
 
 lane_b:
+  - id: G0
+    name: 需求入库合规
+    type: auto
+    checks:
+      - 来源齐全：提出人、渠道、时间三样缺一不可
+      - 原始文件自入库起未被修改（sha256 与 journal 记录一致）
+      - 用的是 requirements/templates/REQ-template.md，5 段不缺
+      - 与已有需求重复的，已标注关联编号而不是新建
+    on_fail: 拒绝入库，退回需求方补来源
+
   - id: G1
-    name: 需求可执行
+    name: 翻译可执行
     type: auto
-    checks:
-      - 需求里出现的业务词，全部能在 ontology 找到，或明确标记为"待建"
-      - 每条需求有验收口径（要什么数、什么粒度、什么时间范围）
-    on_fail: 退回 P1，最多 2 次
-
-  - id: G2
-    name: 本体变更合规
-    type: auto
-    checks:
-      - ontology_delta 通过 ontology/schema/validate.py
-      - 只新增/扩充，不删除已有口径（删除必须走 deprecate + 迁移说明）
-      - 变更以 PR 形式提交，且只有 ontology-admin 能提
-    on_fail: 拒绝合并
-
-  - id: G3
-    name: 建模评审
-    type: hitl
-    hitl: H2 建表评审
-    checks:
-      - 粒度声明唯一且一句话说清
-      - 维度与事实的关联键与基数明确
-      - 分区字段命名符合 dt/小时约定
-    on_fail: 挂起等人
-
-  - id: G4
-    name: 口径确认
-    type: hitl
     hitl: H1 口径确认
     checks:
-      - 分子分母来源表明确
-      - 可加性已声明（比率类必须 non_additive）
-      - 与已有指标无重复定义
-    on_fail: 挂起等人
+      - 8 段齐全（目标/口径/输入/输出/边界/验收/不做什么/待确认项）
+      - 「待确认项」为空——非空说明还有歧义没消
+      - 引用的本体 id 全部存在且 status 不为 deprecated（sk-ont-validate）
+      - 验收标准可断言（有数值或明确条件），不是"数据准确"这类废话
+    on_fail: 退回 P1；H1 未签字不许进 P2
 
-  - id: G5
-    name: SQL 合规
+  - id: G2
+    name: 双轨独立完成
     type: auto
     checks:
-      - 通过 skills/sk-sql-*/validate.py
-      - 无 SELECT *（DWD 及以下）
-      - 分区过滤存在
-    on_fail: 退回 P5
+      - 两轨都有 sql/、design-notes.md、self-check.md，缺一即失败
+      - 两轨 SQL 的 sha256 不相同（相同 = 抄袭或串通，双轨失去意义）
+      - journal 中无跨轨读取事件（developer-1 读 track-2 或反之）
+      - design-notes 里标记 needs-confirmation 的假设，不得同时出现在已完成产出中
+    on_fail: 作废该轮双轨，重跑 P2，并记录违规
 
-  - id: G6
+  - id: G3
+    name: 裁决合格
+    type: auto
+    hitl: H2 方案裁决评审
+    checks:
+      - comparison.md 覆盖两轨全部差异（漏报一个差异即失败）
+      - 每条裁决都带依据引用（本体 id 或知识库条目），不接受"我觉得"
+      - final/ 全部脚本通过 sk-sql-guard
+      - final/ 中与所选轨道不一致的改动，已逐条写进对比报告
+    on_fail: 退回 P3 重新比对；口径冲突则退回 P1
+
+  - id: G4
     name: 质量规则就绪
     type: auto
     checks:
       - 每条 DQ 规则可执行（有 SQL 或断言），不允许"人工检查"
       - 至少覆盖空值、重复、单调性三类
-    on_fail: 退回 P6
+    on_fail: 退回 P4
 
-  - id: G7
+  - id: G5
     name: 上线放行
     type: hitl
     hitl: H3 上线放行
@@ -71,13 +70,13 @@ lane_b:
       - 回滚方案已写
     on_fail: 挂起等人
 
-  - id: G8
+  - id: G6
     name: 交付完整
     type: auto
     checks:
       - 表注释、字段注释齐全
-      - 口径变更说明已写
-    on_fail: 退回 P8
+      - 口径变更说明已写（改了哪个指标的哪个边界，为什么）
+    on_fail: 退回 P6
 
 lane_a:
   - id: GA1

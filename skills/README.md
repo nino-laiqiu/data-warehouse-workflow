@@ -59,20 +59,27 @@ owner: model-designer
 
 ## 命名
 
-`sk-<域>-<动作>`，全小写连字符。域取 `sql` `qry` `ont` `dq` `doc`，动作用动词原形（`ddl` `dml` `intent` `locate` `guard`）。
+`sk-<域>-<动作>`，全小写连字符。域取 `req` `ont` `sql` `qry` `dq` `doc`，动作用动词原形（`register` `validate` `ddl` `dml` `guard` `diff` `intent` `locate`）。
+
+两条线共用的技能不另起域名：SQL 生成与门禁两条线都要用，就都叫 `sk-sql-*`。
 
 ## 技能清单
 
 | 技能 | 线 | 被哪个 stage 调用 | 做什么 | 状态 |
 |---|---|---|---|---|
+| `sk-req-register` | B | P0 | 登记原始需求：校验模板、算 sha256、生成编号 | 待建 |
+| `sk-req-validate` | B | P1 | 翻译稿 8 段齐全、「待确认项」为空 | 待建 |
+| `sk-ont-validate` | B | P1 | 引用的本体 id 存在且未 deprecated | 待建 |
+| `sk-sql-ddl` | 共用 | P2 | 表设计 → Hive DDL | ✅ 已实现 |
+| `sk-sql-dml` | 共用 | P2 | 指标口径 → 聚合 DML | 待建 |
+| `sk-sql-guard` | 共用 | P2 / A3 | SQL 静态门禁（只读、dt、LIMIT、无 SELECT *） | 待建 |
+| `sk-sql-diff` | B | P3 | 两轨 SQL 差异提取 → comparison_report 的 differences | 待建 |
 | `sk-qry-intent` | A | A1 | 自然语言 → 结构化取数意图 | 待建 |
 | `sk-qry-locate` | A | A2 | 意图 → 候选表（ADS→DWS→DWD→ODS） | 待建 |
 | `sk-qry-gen` | A | A3 | 意图 + 表 → SELECT 语句 | 待建 |
-| `sk-qry-guard` | A | A3 | SQL AST 安全门禁（只读、dt、LIMIT） | 待建 |
 | `sk-qry-check` | A | A4 | 结果自检（行数、空值、量级异常） | 待建 |
-| `sk-sql-ddl` | B | P5 | 表设计 → Hive DDL | ✅ 示例 |
-| `sk-sql-dml` | B | P5 | 指标口径 → 聚合 DML | 待建 |
-| `sk-ont-validate` | B | P2 | 本体文件合规校验 | 待建 |
+
+`sk-sql-guard` 两条线共用：A3 拿它拦"分析师写出 UPDATE"，P2 拿它拦"开发者漏了 dt 分区"。同一个门禁，规则只有一份。
 
 > 这张表是"当前状态"，**不是**调用关系的权威来源。改调用关系只改 `pipeline.yaml`，然后跑 `python tools/check_skills.py`，表里的"被哪个 stage 调用"以校验结果为准。
 
