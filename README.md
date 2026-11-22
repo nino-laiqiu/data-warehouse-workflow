@@ -44,15 +44,20 @@
 ## 快速开始
 
 ```bash
-# 1. 校验本体（无 LLM 依赖，CI 可直接跑）
+# 1. 校验本体（纯标准库，无 LLM 依赖，CI 可直接跑）
 python ontology/schema/validate.py
 
-# 2. 校验单个 skill 的输出示例
-python skills/sk-sql-ddl/validate.py --example
+# 2. 校验契约（标准库实现的 JSON Schema 子集）
+python tools/validate_contracts.py runs/<run_id>/intent.json --schema contracts/intent.schema.json
 
-# 3. 本地改动同步到 GitHub（git push 不稳时的备用通道）
-node tools/sync_github.mjs --dry-run
+# 3. 校验 skill 产物：输入契约 + 生成的 SQL 一起查
+python skills/sk-sql-ddl/validate.py --input runs/<run_id>/model_design.json --sql out.sql
+
+# 4. git push 不通时的备用上传通道（走 GitHub API）
+node tools/push_file.mjs README.md README.md "docs: update readme"
 ```
+
+三个校验器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
 
 ## 当前状态
 
