@@ -1,0 +1,114 @@
+# 门禁定义。gate 在本文件里是"可执行的判定"，不是"评审意见"
+version: 1
+
+principle:
+  - 门禁只允许拦截，不允许自动修改产物
+  - 每个 gate 的失败必须给出机器可读原因，否则等于没定
+  - HITL 全局只有 3 个卡点，多一个就没人用
+
+lane_b:
+  - id: G1
+    name: 需求可执行
+    type: auto
+    checks:
+      - 需求里出现的业务词，全部能在 ontology 找到，或明确标记为"待建"
+      - 每条需求有验收口径（要什么数、什么粒度、什么时间范围）
+    on_fail: 退回 P1，最多 2 次
+
+  - id: G2
+    name: 本体变更合规
+    type: auto
+    checks:
+      - ontology_delta 通过 ontology/schema/validate.py
+      - 只新增/扩充，不删除已有口径（删除必须走 deprecate + 迁移说明）
+      - 变更以 PR 形式提交，且只有 ontology-admin 能提
+    on_fail: 拒绝合并
+
+  - id: G3
+    name: 建模评审
+    type: hitl
+    hitl: H2 建表评审
+    checks:
+      - 粒度声明唯一且一句话说清
+      - 维度与事实的关联键与基数明确
+      - 分区字段命名符合 dt/小时约定
+    on_fail: 挂起等人
+
+  - id: G4
+    name: 口径确认
+    type: hitl
+    hitl: H1 口径确认
+    checks:
+      - 分子分母来源表明确
+      - 可加性已声明（比率类必须 non_additive）
+      - 与已有指标无重复定义
+    on_fail: 挂起等人
+
+  - id: G5
+    name: SQL 合规
+    type: auto
+    checks:
+      - 通过 skills/sk-sql-*/validate.py
+      - 无 SELECT *（DWD 及以下）
+      - 分区过滤存在
+    on_fail: 退回 P5
+
+  - id: G6
+    name: 质量规则就绪
+    type: auto
+    checks:
+      - 每条 DQ 规则可执行（有 SQL 或断言），不允许"人工检查"
+      - 至少覆盖空值、重复、单调性三类
+    on_fail: 退回 P6
+
+  - id: G7
+    name: 上线放行
+    type: hitl
+    hitl: H3 上线放行
+    checks:
+      - 血缘图完整，无孤立表
+      - 调度依赖已声明，且不形成环
+      - 回滚方案已写
+    on_fail: 挂起等人
+
+  - id: G8
+    name: 交付完整
+    type: auto
+    checks:
+      - 表注释、字段注释齐全
+      - 口径变更说明已写
+    on_fail: 退回 P8
+
+lane_a:
+  - id: GA1
+    name: 口径明确
+    type: auto
+    checks:
+      - 问题里的指标必须命中 ontology 的唯一口径，命中多个则要求用户澄清
+      - 时间范围与粒度明确
+    on_fail: 反问用户，不猜
+
+  - id: GA2
+    name: SQL 安全
+    type: auto
+    checks:
+      - 只读（SELECT/WITH），无 DDL/DML
+      - 必须带 dt 过滤且范围 <=90 天
+      - LIMIT 2000
+      - 无 SELECT *
+      - JOIN 数 <=3
+    on_fail: 拒绝执行，返回改写建议
+
+  - id: GA3
+    name: 结果可信
+    type: auto
+    checks:
+      - 查询返回非空，或明确解释为空的原因
+      - 量级与历史同口径对比偏差 <=50%（超出要求人工确认）
+      - 结论中不含因果断言
+    on_fail: 标记"结果待确认"，不直接给结论
+
+# 豁免记录：任何豁免都要落盘，口头同意不算
+waivers:
+  file: memory/rulings/waivers.json
+  required_fields: [gate, run_id, reason, approved_by, expires_at]

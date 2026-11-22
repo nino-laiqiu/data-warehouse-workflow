@@ -1,8 +1,25 @@
-# 本机插件打包产物，不入库
-dsh-plugins/*.tgz
-dsh-plugins/**/node_modules/
+# 运行产物不入库
+runs/*
+!runs/.gitkeep
+.tmp/
 
-# 临时与草稿文件
-*.tmp
-*.log
-.p*
+# Python
+__pycache__/
+*.pyc
+
+# 本机插件包（体积大，且是本地环境产物）
+dsh-plugins/*.tgz
+dsh-plugins/*/node_modules/
+
+# 凭据永远不入库
+.credentials*
+*.pem
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 本机 DSH 插件工程，不属于数仓项目
+dsh-plugins/

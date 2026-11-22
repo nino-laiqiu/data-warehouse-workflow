@@ -1,0 +1,9 @@
+id: SEND_CNT
+name: 发送量
+description: 当日发送成功条数，SUM(is_send)
+kind: atomic
+process: PUSH_SEND
+additivity: additive
+caliber: 以厂商受理成功为准，被频控丢弃的不计入
+objects: [DEVICE]
+status: draft

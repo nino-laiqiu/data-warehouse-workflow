@@ -1,0 +1,7 @@
+id: FUNNEL_MONOTONIC
+name: 漏斗单调约束
+description: 同一统计口径下，到达量不得大于发送量，点击量不得大于到达量
+applies_to: PUSH_SEND
+severity: error
+rule: arrive_cnt <= send_cnt AND click_cnt <= arrive_cnt
+status: draft

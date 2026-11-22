@@ -1,0 +1,15 @@
+{
+  "$comment": "契约模板：所有 contracts/*.schema.json 从这里复制。改字段前先想清楚下游是谁。",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "replace-me",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "stage", "payload"],
+  "properties": {
+    "run_id": { "type": "string", "description": "runs/<run_id>/ 的目录名，全链路可追溯" },
+    "stage": { "type": "string", "enum": ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "A1", "A2", "A3", "A4", "A5", "A6"] },
+    "produced_at": { "type": "string", "description": "ISO8601" },
+    "producer": { "type": "string", "description": "agent 或 skill 的名字+版本" },
+    "payload": { "type": "object" }
+  }
+}

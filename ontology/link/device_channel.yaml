@@ -1,0 +1,8 @@
+id: DEVICE_CHANNEL
+name: 设备-通道
+description: 一台设备在某个时点归属一个推送通道，通道会随系统升级或换机变化
+from_object: DEVICE
+to_object: DEVICE
+cardinality: many_to_one
+join_keys: [device_id]
+status: draft

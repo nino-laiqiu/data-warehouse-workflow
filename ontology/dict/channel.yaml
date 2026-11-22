@@ -1,0 +1,6 @@
+id: CHANNEL
+name: 推送通道
+description: 推送下发可用的厂商通道枚举，决定能力差异（是否有展现、是否有回执）
+values: [apns, hms, mipush, oppo, vivo, fcm, self]
+owner: ontology-admin
+status: draft

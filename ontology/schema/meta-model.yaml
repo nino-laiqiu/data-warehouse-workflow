@@ -1,0 +1,53 @@
+# 元模型：定义本体里允许出现哪些实体、每个实体必须有哪些字段
+# 本文件由 ontology/schema/validate.py 读取，改动后请立刻跑一次校验
+version: 1
+
+# 全局 ID 规范：大写字母开头，允许数字与下划线
+id_pattern: "^[A-Z][A-Z0-9_]{2,63}$"
+
+# 引用命名空间：某个字段只能引用某个目录下的 ID
+ref_namespaces:
+  object: object
+  process: process
+  metric: metric
+  dict: dict
+
+entity_types:
+  - name: dict
+    dir: dict
+    required: [id, name, description, values]
+    optional: [owner, status, tags]
+
+  - name: object
+    dir: object
+    required: [id, name, description, grain, keys]
+    optional: [owner, status, tags, attributes]
+
+  - name: process
+    dir: process
+    required: [id, name, description, objects, event_time, measures]
+    optional: [owner, status, tags, source_tables]
+
+  - name: metric
+    dir: metric
+    required: [id, name, description, kind, process, additivity, caliber]
+    optional: [owner, status, tags, objects, filters, derived_from]
+
+  - name: link
+    dir: link
+    required: [id, name, from_object, to_object, cardinality]
+    optional: [owner, status, tags, join_keys]
+
+  - name: constraint
+    dir: constraint
+    required: [id, name, description, applies_to, rule]
+    optional: [owner, status, tags, severity]
+
+# 指标的两类
+metric_kinds: [atomic, derived]
+
+# 可加性三档：可加 / 半可加 / 不可加（比率、去重计数必须显式声明）
+additivity_levels: [additive, semi_additive, non_additive]
+
+# 状态机
+status_values: [draft, review, active, deprecated]
