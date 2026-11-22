@@ -1,3 +1,9 @@
+---
+name: sk-sql-ddl
+version: 0.1.0
+owner: model-designer
+---
+
 # SKILL: sk-sql-ddl — 生成 Hive 建表语句
 
 ## 这是什么

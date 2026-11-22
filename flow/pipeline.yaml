@@ -1,4 +1,7 @@
 # 两条车道的 stage 定义。改这里之前先读 docs/设计文档-数仓智能开发工作流.md §6
+#
+# 每个 stage 必须显式声明 skills（没有就写 []），这是"这一步调用什么技能"的唯一权威来源。
+# 改完跑：python tools/check_skills.py
 version: 1
 
 # 跨 stage 的公共约定
@@ -15,6 +18,7 @@ lane_b_develop:
     - id: P1
       name: 需求受理
       agent: requirement-analyst
+      skills: []
       in: 口头/文档需求
       out: requirement
       gate: G1
@@ -22,6 +26,7 @@ lane_b_develop:
     - id: P2
       name: 本体对齐
       agent: ontology-admin
+      skills: [sk-ont-validate]
       in: requirement
       out: ontology_delta
       gate: G2
@@ -29,6 +34,7 @@ lane_b_develop:
     - id: P3
       name: 维度建模
       agent: model-designer
+      skills: []
       in: ontology_delta
       out: model_design
       gate: G3          # 含 HITL：建表评审
@@ -36,13 +42,15 @@ lane_b_develop:
     - id: P4
       name: 指标定义
       agent: metric-owner
+      skills: []
       in: model_design
       out: metric_spec
       gate: G4          # 含 HITL：口径确认
 
     - id: P5
       name: SQL 生成
-      skill: sk-sql-ddl, sk-sql-dml
+      agent: 无（skill 直调）
+      skills: [sk-sql-ddl, sk-sql-dml]
       in: model_design + metric_spec
       out: sql_scripts
       gate: G5
@@ -50,6 +58,7 @@ lane_b_develop:
     - id: P6
       name: 质量规则
       agent: quality-engineer
+      skills: []
       in: model_design + metric_spec
       out: dq_rules
       gate: G6
@@ -57,6 +66,7 @@ lane_b_develop:
     - id: P7
       name: 血缘与调度
       agent: lineage-steward
+      skills: []
       in: sql_scripts + dq_rules
       out: lineage
       gate: G7          # 含 HITL：上线放行
@@ -64,6 +74,7 @@ lane_b_develop:
     - id: P8
       name: 文档交付
       agent: doc-writer
+      skills: []
       in: 以上全部
       out: 文档与变更说明
       gate: G8
@@ -74,28 +85,32 @@ lane_a_analyze:
   stages:
     - id: A1
       name: 意图解析
-      skill: sk-qry-intent
+      agent: 无（skill 直调）
+      skills: [sk-qry-intent]
       in: 自然语言问题
       out: intent
       gate: GA1
 
     - id: A2
       name: 找数定位
-      skill: sk-qry-locate
+      agent: 无（skill 直调）
+      skills: [sk-qry-locate]
       in: intent
       out: 候选表与字段（ADS>DWS>DWD>ODS）
       gate: GA1
 
     - id: A3
       name: 查询生成
-      skill: sk-qry-guard
+      agent: 无（skill 直调）
+      skills: [sk-qry-gen, sk-qry-guard]   # 先生成，再过门禁
       in: intent + 定位结果
       out: analysis
       gate: GA2
 
     - id: A4
       name: 结果自检
-      agent: 无（脚本）
+      agent: 无（skill 直调）
+      skills: [sk-qry-check]
       in: analysis
       out: 自检报告
       gate: GA3
@@ -103,6 +118,7 @@ lane_a_analyze:
     - id: A5
       name: 结论生成
       agent: analyst-writer
+      skills: []
       in: 查询结果 + 自检报告
       out: 结论（禁用因果表述）
       gate: GA3
@@ -110,6 +126,7 @@ lane_a_analyze:
     - id: A6
       name: 沉淀
       agent: orchestrator
+      skills: []
       in: 本次 run
       out: memory/ 提案或 knowledge/ 范例
       gate: 无

@@ -27,10 +27,10 @@
 | `ontology/` | 对象 / 过程 / 指标 / 关系 / 约束 | 本体管理员（唯一） | 其余角色只读；改动只能走 `ontology_delta` |
 | `knowledge/` | LLM 知识库：规范 / 方言 / 范例 / 踩坑；`wiki/` 是表与词根的索引页 | 任何人提 PR | 只回答"怎么写"，不定义口径 |
 | `memory/` | 长期记忆：决策、口径裁决、评审结论 | 编排器 | 追加式，只增不改 |
-| `skills/` | 可判定的原子动作 | 开发者 | 每个 skill 必带 `schema.json` + `validate.py` |
+| `skills/` | 技能：可被工作流按名字调用的一步操作 | 开发者 | `SKILL.md`（name/version/owner）+ `schema.json` + `validate.py` |
 | `agents/` | 角色与权责 | 架构 | 不内联业务规则 |
 | `contracts/` | 阶段交付物 JSON Schema | 架构 | 缺字段即硬失败 |
-| `flow/` | 状态机 + 门禁规则 | 架构 | 门禁强度可在 `gates.yaml` 调 |
+| `flow/` | 状态机 + 门禁 + **每个 stage 调用哪些技能** | 架构 | 技能调用关系只在这里维护 |
 | `templates/` | DDL / DML / DAG / 文档模板 | 开发者 | 被 skills 引用，不单独使用 |
 | `runs/` | 单次运行的产物与指纹 | 机器 | 不入库（`.gitignore`） |
 | `tools/` | 工程脚本（同步、校验） | 开发者 | — |
@@ -58,9 +58,12 @@ node tools/push_file.mjs README.md README.md "docs: update readme"
 
 # 5. 校验 wiki 内部链接（改完 wiki 必跑）
 python tools/check_wiki.py
+
+# 6. 校验技能引用：工作流里写了什么技能，就必须有什么目录（反过来也查）
+python tools/check_skills.py
 ```
 
-四个校验器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
+五个校验器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
 
 ## 当前状态
 
