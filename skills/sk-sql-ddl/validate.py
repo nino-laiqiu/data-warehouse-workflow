@@ -66,7 +66,11 @@ def check_contract(contract: dict, schema: dict) -> list[str]:
 
 def check_sql(sql: str) -> list[str]:
     errs: list[str] = []
-    body = sql.strip()
+    # 去掉开头的注释块：带表头注释的 DDL 是常态，不能因此判失败
+    lines = sql.splitlines()
+    while lines and (not lines[0].strip() or lines[0].lstrip().startswith("--")):
+        lines.pop(0)
+    body = "\n".join(lines).strip()
     if not body:
         return ["SQL 为空"]
     upper = body.upper()
