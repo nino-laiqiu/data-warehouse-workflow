@@ -1,0 +1,17 @@
+id: ORDER_CREATE
+name: 下单
+description: 用户提交订单的动作。下单不代表付款，两者必须分开统计，否则会把大量弃单算成成交
+objects: [USER, ORDER, PRODUCT]
+event_time: create_time
+measures:
+  - id: M_ORDER_CREATE_CNT
+    additivity: additive
+    description: 下单笔数
+  - id: M_ORDER_CREATE_AMT
+    additivity: additive
+    description: 下单金额（应付金额合计）
+source_tables:
+  - ods_order_main_di
+  - ods_order_item_di
+owner: ontology-admin
+status: draft

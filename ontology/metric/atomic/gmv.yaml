@@ -1,0 +1,9 @@
+id: GMV
+name: 成交总额
+description: 支付成功金额合计。这是全公司最容易被重新定义的指标，所以口径写死在本体里，任何人不得在报表里另起一套
+kind: atomic
+process: PAY
+additivity: additive
+caliber: 以支付流水为准，按 pay_time 归日；不含运费；退款不回冲（退款单独出指标），跨天退款也不调整历史 GMV
+objects: [USER, ORDER]
+status: draft

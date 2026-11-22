@@ -1,0 +1,8 @@
+id: ORDER_USER
+name: 订单-用户
+description: 一笔订单归属一个下单用户；一个用户有多笔订单
+from_object: ORDER
+to_object: USER
+cardinality: many_to_one
+join_keys: [user_id]
+status: draft

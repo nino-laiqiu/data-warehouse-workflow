@@ -1,0 +1,7 @@
+id: REFUND_LE_PAY
+name: 退款不超过支付
+description: 任一统计周期内，退款金额不得超过支付金额的当日累计；跨期退款导致的单日超标必须能解释
+applies_to: PAY
+severity: error
+rule: refund_amt <= pay_amt
+status: draft

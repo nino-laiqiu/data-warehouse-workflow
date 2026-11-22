@@ -1,0 +1,8 @@
+id: ORDER_PRODUCT
+name: 订单-商品
+description: 订单与 SKU 通过订单明细关联，一笔订单含多个 SKU，一个 SKU 出现在多笔订单里
+from_object: ORDER
+to_object: PRODUCT
+cardinality: many_to_many
+join_keys: [order_id, sku_id]
+status: draft

@@ -1,0 +1,10 @@
+id: AOV
+name: 客单价
+description: GMV 除以支付订单数。比率类指标，任何维度下都不可直接相加，更不可对日粒度求平均
+kind: derived
+process: PAY
+additivity: non_additive
+caliber: 分子 GMV、分母 ORDER_CNT 必须同维度同时间范围；跨天汇总要用 SUM(GMV)/SUM(ORDER_CNT)，不能 AVG(日客单价)
+objects: [USER, ORDER]
+derived_from: [GMV, ORDER_CNT]
+status: draft

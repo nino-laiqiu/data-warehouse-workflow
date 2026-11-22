@@ -1,0 +1,10 @@
+id: REFUND_RATE
+name: 退款率
+description: 退款金额除以支付金额。分子目前只在 ADS 层有，本体里先挂 GMV 做分母引用，退款金额指标待 P4 补齐
+kind: derived
+process: PAY
+additivity: non_additive
+caliber: 分子分母同期间；退款按退款完成时间归日，因此当日退款率可能大于 100%，这是正常的，不是数据错误
+objects: [ORDER]
+derived_from: [GMV]
+status: draft

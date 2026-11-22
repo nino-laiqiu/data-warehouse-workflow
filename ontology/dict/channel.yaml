@@ -1,6 +1,6 @@
 id: CHANNEL
-name: 推送通道
-description: 推送下发可用的厂商通道枚举，决定能力差异（是否有展现、是否有回执）
-values: [apns, hms, mipush, oppo, vivo, fcm, self]
+name: 交易渠道
+description: 用户下单所在的端。不同端的埋点覆盖度不同，跨端对比金额可以，对比转化率要小心
+values: [app, mini_program, h5, pc]
 owner: ontology-admin
 status: draft

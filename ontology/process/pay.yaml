@@ -1,0 +1,17 @@
+id: PAY
+name: 支付
+description: 订单支付成功的动作。以支付流水为准，不以订单状态为准——订单状态会被人工改，流水不会
+objects: [USER, ORDER]
+event_time: pay_time
+measures:
+  - id: M_PAY_AMT
+    additivity: additive
+    description: 支付金额合计，GMV 的分子来源
+  - id: M_PAY_CNT
+    additivity: additive
+    description: 支付成功订单数
+source_tables:
+  - ods_pay_flow_di
+  - ods_order_main_di
+owner: ontology-admin
+status: draft

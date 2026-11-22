@@ -1,0 +1,13 @@
+id: PRODUCT
+name: 商品
+description: 商品 SKU。同一商品在不同店铺价格可能不同，所以 SKU 的唯一键要带店铺
+grain: SKU
+keys: [sku_id]
+attributes:
+  - sku_id
+  - shop_id
+  - category_id
+  - title
+  - list_price
+owner: ontology-admin
+status: draft

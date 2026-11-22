@@ -1,0 +1,9 @@
+id: ORDER_CNT
+name: 支付订单数
+description: 支付成功的订单笔数，按订单去重计数。与「下单数」不是一个指标，别混用
+kind: atomic
+process: PAY
+additivity: additive
+caliber: 一个 order_id 计 1，部分退款不重复计入；按 pay_time 归日
+objects: [USER, ORDER]
+status: draft

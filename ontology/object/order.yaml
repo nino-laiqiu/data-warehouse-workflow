@@ -1,0 +1,16 @@
+id: ORDER
+name: 订单
+description: 一次交易的主单据，一笔订单可含多个 SKU。订单金额是「应付」，不是「实付」，实付要看支付流水
+grain: 订单
+keys: [order_id]
+attributes:
+  - order_id
+  - user_id
+  - channel
+  - order_status
+  - order_amount
+  - freight_amount
+  - create_time
+  - pay_time
+owner: ontology-admin
+status: draft

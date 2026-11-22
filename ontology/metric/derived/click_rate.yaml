@@ -1,9 +1,0 @@
-id: CLICK_RATE
-name: 点击率
-description: 点击量除以到达量。分母不是发送量，因为厂商不保证「发送即可展示」
-kind: derived
-process: PUSH_SEND
-additivity: non_additive
-caliber: 当日到达且当日点击，归因窗口 1 天；对外口径见 click_rate_send
-objects: [DEVICE]
-status: draft

@@ -1,0 +1,12 @@
+id: USER
+name: 用户
+description: 注册账号。与设备是多对多：一个用户可在多台设备登录，一台设备也可被多个账号登录过
+grain: 用户
+keys: [user_id]
+attributes:
+  - user_id
+  - register_time
+  - register_channel
+  - member_level
+owner: ontology-admin
+status: draft

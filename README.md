@@ -4,7 +4,7 @@
 
 - 目标平台：Hive 3.x / Spark SQL 3.x
 - 建模方法论：Kimball 维度建模 + OneData 原子/派生指标
-- 首个样板域：手机 Push 推送数据
+- 样板域：常规电商交易（用户 / 商品 / 订单 / 支付）——选它是因为结构简单、人人都懂，适合当模板
 
 ## 两条泳道
 
@@ -71,6 +71,7 @@ node tools/push_file.mjs README.md README.md "docs: update readme"
 | M2a A 线最小闭环 | `skills/sk-qry-*` | 未开始 |
 | M2b B 线 Skills | `skills/sk-sql-*` | 未开始 |
 | M3 编排 + Agents | `flow/` `agents/` | 未开始 |
-| M4 Push 域闭环 | `runs/` | 未开始 |
+| M4 电商域闭环 | `runs/` | 未开始 |
 
-先读设计文档第 7 章（两条流水线），再读第 9 章（Push 域端到端走查）。
+先读设计文档第 7 章（两条流水线）。注意：第 9 章的端到端走查是用 Push 域写的（比电商复杂），
+本仓库的模板实现换成**电商交易域**——结构一样，但更适合当起点。

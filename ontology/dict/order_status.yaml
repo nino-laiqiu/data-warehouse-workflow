@@ -1,0 +1,6 @@
+id: ORDER_STATUS
+name: 订单状态
+description: 订单生命周期的状态枚举。口径上「已支付」不等于「已完成」，退款类指标必须单独取状态
+values: [created, paid, shipped, completed, cancelled, refunding, refunded]
+owner: ontology-admin
+status: draft
