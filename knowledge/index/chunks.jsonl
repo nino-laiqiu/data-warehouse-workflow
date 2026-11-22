@@ -1,0 +1,6 @@
+{"id":"k-0001","path":"03_范例/example-gmv-by-channel.md","title":"从问句到可信 SQL：各渠道 GMV 走查","tags":["ecommerce","gmv","sql","example"],"verified_by":"manual"}
+{"id":"k-0002","path":"wiki/01-命名与词根.md","title":"命名规范与常用词根（amt/cnt/qty/rate）","tags":["naming","glossary","standard"],"verified_by":null}
+{"id":"k-0003","path":"wiki/02-度量与指标.md","title":"度量清单与 12 个常用指标公式","tags":["metric","measure","additivity"],"verified_by":null}
+{"id":"k-0004","path":"wiki/03-事实表.md","title":"10 张常用事实表：粒度/主键/上下游/坑","tags":["table","dwd","dws","ads"],"verified_by":null}
+{"id":"k-0005","path":"wiki/04-维表.md","title":"6 张维表与 SCD 取数写法","tags":["dim","scd","join"],"verified_by":null}
+{"id":"k-0006","path":"wiki/05-取数路径.md","title":"取数决策树：先选表再写 SQL","tags":["routing","query","ads"],"verified_by":null}

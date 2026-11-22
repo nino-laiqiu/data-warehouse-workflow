@@ -25,7 +25,7 @@
 |---|---|---|---|
 | `docs/` | 设计文档 | 人 | 参考物，不参与校验 |
 | `ontology/` | 对象 / 过程 / 指标 / 关系 / 约束 | 本体管理员（唯一） | 其余角色只读；改动只能走 `ontology_delta` |
-| `knowledge/` | LLM 知识库：规范 / 方言 / 范例 / 踩坑 | 任何人提 PR | 只回答"怎么写"，不定义口径 |
+| `knowledge/` | LLM 知识库：规范 / 方言 / 范例 / 踩坑；`wiki/` 是表与词根的索引页 | 任何人提 PR | 只回答"怎么写"，不定义口径 |
 | `memory/` | 长期记忆：决策、口径裁决、评审结论 | 编排器 | 追加式，只增不改 |
 | `skills/` | 可判定的原子动作 | 开发者 | 每个 skill 必带 `schema.json` + `validate.py` |
 | `agents/` | 角色与权责 | 架构 | 不内联业务规则 |
@@ -55,9 +55,12 @@ python skills/sk-sql-ddl/validate.py --input runs/<run_id>/model_design.json --s
 
 # 4. git push 不通时的备用上传通道（走 GitHub API）
 node tools/push_file.mjs README.md README.md "docs: update readme"
+
+# 5. 校验 wiki 内部链接（改完 wiki 必跑）
+python tools/check_wiki.py
 ```
 
-三个校验器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
+四个校验器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
 
 ## 当前状态
 
@@ -67,7 +70,7 @@ node tools/push_file.mjs README.md README.md "docs: update readme"
 |---|---|---|
 | M0 设计定稿 | [`docs/设计文档-数仓智能开发工作流.md`](docs/设计文档-数仓智能开发工作流.md) | 待评审 |
 | M1 骨架 | 目录 + 校验器 + 一份示例 skill/agent | ✅ 本版 |
-| M1 本体 + 知识库 | `ontology/` `knowledge/` 填内容 | 进行中 |
+| M1 本体 + 知识库 | `ontology/` `knowledge/` 填内容 | ✅ 14 个本体文件 + 6 页 wiki |
 | M2a A 线最小闭环 | `skills/sk-qry-*` | 未开始 |
 | M2b B 线 Skills | `skills/sk-sql-*` | 未开始 |
 | M3 编排 + Agents | `flow/` `agents/` | 未开始 |
