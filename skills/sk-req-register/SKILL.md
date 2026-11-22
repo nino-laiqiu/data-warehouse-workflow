@@ -8,7 +8,7 @@ owner: orchestrator
 
 ## 这是什么
 
-把一份放进 `requirements/inbox/` 的原始需求**登记在案**：校验模板完整性、算 `sha256`、分配编号、追加到登记簿。
+把一份放进 `requirements/反馈者/<需求目录>/` 的原始需求**登记在案**：校验模板完整性、算 `sha256`、分配编号、追加到登记簿。
 
 **不是**什么：不改需求内容、不翻译需求、不判断需求合不合理。它只回答一个问题——"这份文件从此刻起是不是有了一个不可篡改的身份"。
 
@@ -27,10 +27,10 @@ owner: orchestrator
 
 ## 输出
 
-`requirements/inbox/_registry.jsonl` 追加一行：
+`requirements/反馈者/_registry.jsonl` 追加一行：
 
 ```json
-{"req_id":"REQ-20261122-01","path":"requirements/inbox/REQ-20261122-01.md","sha256":"…","proposer":"张敏","channel":"钉钉「数据需求」群","submitted_at":"2026-11-22 10:12","registered_at":"2026-11-22T16:20:03+08:00","title":"渠道 GMV 日报"}
+{"req_id":"REQ-20261122-01","path":"requirements/反馈者/渠道GMV日报需求20261122/REQ-20261122-01.md","requirement_dir":"渠道GMV日报需求20261122","sha256":"…","proposer":"张敏","channel":"钉钉「数据需求」群","submitted_at":"2026-11-22 10:12","registered_at":"2026-11-22T16:20:03+08:00","title":"渠道 GMV 日报"}
 ```
 
 同时把结果打印成 JSON：`{ok, req_id, sha256, path, registered}`。

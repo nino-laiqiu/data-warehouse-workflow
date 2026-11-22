@@ -11,6 +11,11 @@
  *   GITHUB_TOKEN=xxx node tools/push_batch.mjs "提交信息" README.md knowledge/wiki/README.md
  *   GITHUB_TOKEN=xxx node tools/push_batch.mjs --msg-file .tmp/msg.txt --files-from .tmp/files.txt
  *
+ * 删除文件：清单里写 `-路径`（前缀减号），tree 里用 sha:null 表达。
+ *   .tmp/files.txt:
+ *     requirements/inbox/REQ-20261122-01.md
+ *     -requirements/inbox/_registry.jsonl
+ *
  * 为什么有 --msg-file / --files-from：本机 PowerShell 的 Start-Process 会按空格
  * 重切参数，中文提交信息（含空格与换行）和长文件清单都会被拆坏。
  *
@@ -75,7 +80,14 @@ const parent = await api('GET', `/git/commits/${parentSha}`);
 console.log(`基提交 ${parentSha.slice(0, 7)} (${parent.message.split('\n')[0]})`);
 
 const tree = [];
-for (const path of files) {
+for (const item of files) {
+  if (item.startsWith('-')) {
+    const path = item.slice(1).replaceAll('\\', '/');
+    tree.push({ path, mode: '100644', type: 'blob', sha: null });
+    console.log(`  del ${path}`);
+    continue;
+  }
+  const path = item;
   let content;
   try {
     content = await readFile(path);

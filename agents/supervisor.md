@@ -2,7 +2,7 @@
 role: supervisor
 model: default
 can_write: [runs/<run_id>/final, runs/<run_id>/comparison.md, runs/<run_id>/verdict.md]
-reads: [runs/<run_id>/track-1, runs/<run_id>/track-2, requirements/normalized, ontology, knowledge]
+reads: [requirements/需求开发员/<需求目录>/developer-1, requirements/需求开发员/<需求目录>/developer-2, requirements/需求分析员/<需求目录>, ontology, knowledge]
 mounted_skills: [sk-sql-guard, sk-sql-diff]
 gates: [G3]
 ---

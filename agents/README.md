@@ -11,7 +11,7 @@
 | 角色 | 能写 | 只读 | 禁止 |
 |---|---|---|---|
 | `orchestrator` | `runs/`、派活记录 | 全部 | 改本体、写 SQL、改裁决 |
-| `requirement-translator` | `requirements/normalized/` | `inbox/`、本体、知识库 | 改原始需求、自定义口径 |
+| `requirement-translator` | `requirements/需求分析员/<需求目录>/` | `反馈者/<需求目录>/`、本体、知识库 | 改原始需求、自定义口径 |
 | `chronicler`（追踪者） | `runs/<run_id>/journal.jsonl` | 全部 | 改任何产物、参与决策 |
 | `developer-1` | `runs/<run_id>/track-1/` | 翻译稿、本体、知识库 | **读 track-2**、改翻译稿 |
 | `developer-2` | `runs/<run_id>/track-2/` | 翻译稿、本体、知识库 | **读 track-1**、改翻译稿 |
@@ -40,7 +40,7 @@ model: default
 can_write: [runs/<run_id>/track-1]
 mounted_skills: [sk-sql-ddl, sk-sql-dml, sk-sql-guard]
 gates: [G2]
-reads: [requirements/normalized, ontology, knowledge]
+reads: [requirements/需求分析员/<需求目录>, ontology, knowledge]
 must_not_read: [runs/<run_id>/track-2]
 ---
 ```

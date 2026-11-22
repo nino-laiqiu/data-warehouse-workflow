@@ -7,8 +7,8 @@
   "properties": {
     "path": {
       "type": "string",
-      "pattern": "^requirements/inbox/REQ-\\d{8}-\\d{2}(-v\\d+)?\\.md$",
-      "description": "原始需求文件路径，必须已存在于 inbox/"
+      "pattern": "^requirements/反馈者/[^/]+/REQ-\\d{8}-\\d{2}(-v\\d+)?\\.md$",
+      "description": "原始需求文件路径，必须已存在于 反馈者/<需求目录>/ 下"
     },
     "proposer": { "type": "string", "minLength": 1, "description": "提出人；不许写'不详'" },
     "channel": { "type": "string", "minLength": 1, "description": "渠道：群名/邮件主题/会议名" },

@@ -4,6 +4,8 @@
     python tools/validate_contracts.py runs/<run_id>/            # 校验整个目录
     python tools/validate_contracts.py doc.json --schema contracts/intent.schema.json
     python tools/validate_contracts.py doc.json --schema contracts/intent.schema.json --json
+    python tools/validate_contracts.py journal.jsonl --schema contracts/journal_entry.schema.json --lines
+      # --lines：一行一个 JSON（journal.jsonl 这类追加式账本），逐行校验并报行号
 
 支持的子集（够了，不追求完整）：
     type / required / properties / additionalProperties:false /
@@ -107,12 +109,33 @@ def validate(value, schema: dict, root: dict, path: str = "$") -> list[str]:
 
 def validate_file(doc_path: Path, schema_path: Path) -> list[str]:
     doc = json.loads(doc_path.read_text(encoding="utf-8"))
+    return validate_against(doc, schema_path)
+
+
+def validate_against(doc, schema_path: Path) -> list[str]:
     root = json.loads(schema_path.read_text(encoding="utf-8"))
     return validate(doc, root, root)
 
 
+def validate_jsonl(doc_path: Path, schema_path: Path) -> list[str]:
+    """一行一个 JSON（journal.jsonl 这类追加式账本）。"""
+    errs: list[str] = []
+    for n, line in enumerate(doc_path.read_text(encoding="utf-8").splitlines(), 1):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            doc = json.loads(line)
+        except json.JSONDecodeError as exc:
+            errs.append(f"第 {n} 行 JSON 解析失败: {exc}")
+            continue
+        errs.extend(f"第 {n} 行: {e}" for e in validate_against(doc, schema_path))
+    return errs
+
+
 def main(argv: list[str]) -> int:
     as_json = "--json" in argv
+    lines_mode = "--lines" in argv
     args = [a for a in argv if not a.startswith("--")]
     if not args:
         print(__doc__)
@@ -124,7 +147,11 @@ def main(argv: list[str]) -> int:
         args = [a for a in args if a != schema_arg]
 
     target = Path(args[0])
-    targets = sorted(target.rglob("*.json")) if target.is_dir() else [target]
+    if target.is_dir():
+        pattern = "*.jsonl" if lines_mode else "*.json"
+        targets = sorted(target.rglob(pattern))
+    else:
+        targets = [target]
 
     results = []
     for doc_path in targets:
@@ -134,7 +161,7 @@ def main(argv: list[str]) -> int:
                             "errors": [f"找不到对应 schema（期望按契约名匹配 contracts/<name>.schema.json）"]})
             continue
         try:
-            errs = validate_file(doc_path, schema_path)
+            errs = validate_jsonl(doc_path, schema_path) if lines_mode else validate_file(doc_path, schema_path)
         except json.JSONDecodeError as exc:
             errs = [f"JSON 解析失败: {exc}"]
         results.append({"file": str(doc_path), "schema": str(schema_path), "ok": not errs, "errors": errs})

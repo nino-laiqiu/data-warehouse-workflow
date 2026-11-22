@@ -7,7 +7,7 @@ version: 2
 defaults:
   handoff: json_contract        # 只允许 JSON 契约交接，禁止自然语言
   contract_dir: contracts/
-  run_dir: runs/<run_id>/
+  run_dir: runs/<run_id>/        # 仅 A 线用；B 线的 run 目录就是需求目录，不另建
   fail_fast: true               # 缺字段即失败，不做"合理推断"
 
 lane_b_develop:
@@ -20,7 +20,7 @@ lane_b_develop:
       agent: orchestrator（登记，人不经 AI 投放原件）
       skills: [sk-req-register]
       in: 原始需求（群/邮件/会议/工单）
-      out: requirements/inbox/REQ-*.md + sha256 登记
+      out: requirements/反馈者/<需求目录>/REQ-*.md + sha256 登记
       gate: G0
 
     - id: P1
@@ -28,15 +28,15 @@ lane_b_develop:
       agent: requirement-translator
       skills: [sk-req-validate, sk-ont-validate]
       in: inbox 原始需求
-      out: requirements/normalized/REQ-*.md（8 段，待确认项为空）
+      out: requirements/需求分析员/<需求目录>/REQ-*.md（8 段，待确认项为空）
       gate: G1                # 含 HITL：H1 口径确认
 
     - id: P2
       name: 双轨开发
       agent: developer-1 ∥ developer-2（并行，互不可见）
       skills: [sk-sql-ddl, sk-sql-dml, sk-sql-guard]
-      in: normalized 翻译稿 + ontology + knowledge
-      out: runs/<run_id>/track-{1,2}/{sql/,design-notes.md,self-check.md}
+      in: 需求分析员/<需求目录>/ 翻译稿 + ontology + knowledge
+      out: requirements/需求开发员/<需求目录>/developer-{1,2}/（sql + design-notes.md + self-check.md）
       gate: G2
 
     - id: P3
@@ -44,7 +44,7 @@ lane_b_develop:
       agent: supervisor
       skills: [sk-sql-diff, sk-sql-guard]
       in: track-1 + track-2
-      out: comparison.md + verdict.md + final/
+      out: requirements/需求开发员/<需求目录>/监督者/{comparison.md,verdict.md,final/}
       gate: G3                # 含 HITL：H2 方案裁决评审
 
     - id: P4
@@ -126,7 +126,7 @@ lane_a_analyze:
 # 横切角色：不属于任何单个 stage，但每个 stage 前后都要触发
 cross_cutting:
   - role: chronicler
-    writes: runs/<run_id>/journal.jsonl
+    writes: requirements/需求开发员/<需求目录>/journal.jsonl
     events: [conversation, artifact, gate]
     when: 每个 stage 开始与结束、每次产物变更、每次门禁判定
 

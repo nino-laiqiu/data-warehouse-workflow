@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """sk-req-validate：G1 门禁——翻译稿能不能开工。
 
-    python skills/sk-req-validate/validate.py --doc requirements/normalized/REQ-20261122-01.md
+    python skills/sk-req-validate/validate.py --doc requirements/需求分析员/渠道GMV日报需求20261122/REQ-20261122-01.md
     python skills/sk-req-validate/validate.py --doc ... --json
 
 纯标准库、只读。检查 8 段、待确认项、sha256 溯源、本体引用、验收标准可断言。
@@ -72,7 +72,7 @@ def main(argv: list[str]) -> int:
     args = dict(zip(argv[::2], argv[1::2]))
     doc_arg = args.get("--doc")
     if not doc_arg:
-        print("用法: validate.py --doc requirements/normalized/REQ-*.md [--registry PATH] [--json]", file=sys.stderr)
+        print("用法: validate.py --doc requirements/需求分析员/<需求目录>/REQ-*.md [--registry PATH] [--json]", file=sys.stderr)
         return 2
 
     root = repo_root()
@@ -115,7 +115,7 @@ def main(argv: list[str]) -> int:
     if not hashes:
         errors.append("没有引用原始需求的 sha256（溯源断了，没法和原件对账）")
     if req_ids and hashes:
-        registry_path = Path(args["--registry"]) if "--registry" in args else root / "requirements/inbox/_registry.jsonl"
+        registry_path = Path(args["--registry"]) if "--registry" in args else root / "requirements/反馈者/_registry.jsonl"
         registry = load_registry(registry_path if registry_path.is_absolute() else root / registry_path)
         row = registry.get(req_ids[0])
         if not row:

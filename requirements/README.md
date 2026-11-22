@@ -1,76 +1,95 @@
-# requirements/ —— 原始需求与翻译稿
+# requirements/ —— 需求在这里长大，一个需求一个目录
 
-两条泳道里，只有 B 线从这里开始。目录分成两半，因为它们是两种不同性质的东西：
-
-| 目录 | 是什么 | 规则 |
-|---|---|---|
-| `inbox/` | 原始需求：谁、什么时候、通过什么渠道提的，原样存档 | **只增不改**。要改就新加一个 `-v2` 文件 |
-| `normalized/` | 翻译稿：需求翻译者产出的规范化 MD，开发者只读这一份 | 由 `requirement-translator` 生成，带 front matter |
-
-## 为什么必须分开
-
-原始需求是**证据**，翻译稿是**合同**。
-
-混在一起的后果很具体：三个月后有人说"当初不是这么说的"，你翻出来的文件已经被翻译者改过三版，无法判断哪句是客户原话、哪句是翻译者的理解。分开之后，原始文件带 `sha256`，任何争议都能回到原件。
-
-## 命名
+B 线从这开始。这里不再按"文件类型"分层（inbox / normalized），而是按**角色**分层，每个需求在每个角色目录下都有**自己的同名子目录**：
 
 ```
-inbox/REQ-20261122-01.md          # 原始需求
-inbox/REQ-20261122-01-v2.md       # 补充/修订，不覆盖原文件
-normalized/REQ-20261122-01.md     # 翻译稿，front matter 里引用原始文件与 hash
+requirements/
+├── 反馈者/                          ← 谁提的，原话存档
+│   ├── _registry.jsonl              （全局登记簿）
+│   └── 画像标签需求20261122/
+│       └── REQ-20261122-02.md
+├── 需求分析员/                       ← 翻译成可执行合同
+│   └── 画像标签需求20261122/
+│       └── REQ-20261122-02.md
+├── 需求开发员/                       ← 双轨开发 + 比对裁决
+│   └── 画像标签需求20261122/
+│       ├── developer-1/             （轨 A：SQL + design-notes.md + self-check.md）
+│       ├── developer-2/             （轨 B：同上，互不可见）
+│       ├── 监督者/                   （comparison.md、verdict.md、comparison_report.json、final/）
+│       └── journal.jsonl            （追踪者的账本）
+└── templates/                       ← 两份模板，不是需求
 ```
 
-`REQ-<日期>-<序号>`，序号当天递增。不用"交易域需求"这种名字——名字会变，编号不会。
+## 三条硬规则
 
-## 入库五条
+1. **目录即需求身份**：目录名 `<短名>需求<YYYYMMDD>`，例如 `画像标签需求20261122`。三个角色目录下的目录名必须**完全一致**，靠它把同一需求的三类产物连起来。
+2. **不许平铺**：任何 `REQ-*.md` 直接躺在 `requirements/` 或角色目录根下，`tools/check_layout.py` 直接判 FAIL。理由很实际——十个需求平铺一个月后，没人能说清哪个 SQL 属于哪个需求。
+3. **run 目录 = 需求目录**：B 线不再另建 `runs/<run_id>/`，开发过程就长在 `需求开发员/<需求目录>/` 里。要归档、要交接、要销毁，都是一个目录的事。
 
-1. **必须写来源**：提出人、渠道（群/邮件/会议）、时间。写"来源不详"的需求一律不收。
-2. **不许改**：改了就没有证据价值。修订 = 新文件。
-3. **不许删**：被撤销的需求标记 `status: withdrawn`，文件留着。
-4. **必须算 hash**：`sk-req-register` 会算 `sha256` 写进 `_registry.jsonl`，用于事后证明"翻译稿基于哪个版本"。
-5. **必须用模板**：见 [templates/REQ-template.md](templates/REQ-template.md)，缺段落在 G0 门禁就拦。
+## 为什么不用"交易域需求"这种名字
 
-## 登记簿：`inbox/_registry.jsonl`
+名字会变，编号不会。目录里的编号 `REQ-20261122-02` 是唯一标识；目录名前面那截中文只是给人看的。两者对不上（目录日期 ≠ 编号日期）会被 `check_layout.py` 和 `register.py` 双双拦下。
 
-Append-only，一行一条。它是唯一能回答"这份原件有没有被人改过"的地方：
+## 反馈者：原始需求
+
+| 规则 | 说明 |
+|---|---|
+| 只增不改 | 改了就没有证据价值。修订 = 另存 `-v2` 文件 |
+| 不许删 | 撤销的需求标 `status: withdrawn`，文件留着 |
+| 必须写来源 | 提出人、渠道（群/邮件/会议）、时间。写"来源不详"一律不收 |
+| 必须算 hash | `register.py` 把 `sha256` 写进登记簿，用于证明"这份原件没被改过" |
+| 必须用模板 | [templates/REQ-template.md](templates/REQ-template.md)，缺段 G0 就拦 |
+
+## 登记簿：`反馈者/_registry.jsonl`
+
+Append-only，一行一条。全局一份，因为它回答的是跨需求的问题："这个编号有没有被占用""这份原件有没有被改过"。
 
 ```bash
 # 登记（幂等：重复登记不会写第二行）
 python skills/sk-req-register/register.py \
-  --path requirements/inbox/REQ-20261122-01.md \
+  --path "requirements/反馈者/渠道GMV日报需求20261122/REQ-20261122-01.md" \
   --proposer 张敏 --channel 钉钉-数据需求群 --submitted-at 2026-11-22T10:12
 
-# G0 门禁：对账（原件 hash 变了、没登记、模板缺段，全部拦）
+# G0 门禁：对账（未登记 / hash 变了 / 目录平铺 / 模板缺段，全部拦）
 python skills/sk-req-register/validate.py
+
+# 布局门禁：三个角色目录的目录名是否一致、开发目录结构是否齐全
+python tools/check_layout.py
 ```
 
-改过原件的文件**不允许重新登记**——必须另存 `-v2`。这是唯一能发现"有人偷偷改证据"的机制。
+条目字段：`req_id`、`path`、`requirement_dir`、`sha256`、`proposer`、`channel`、`submitted_at`、`registered_at`、`title`；历史搬迁过的条目还会有 `path_before` 与 `moved_at`——**搬过家要留痕，否则"当初的文件在哪"就说不清了**。
 
-## 翻译稿
+改过原件的文件**不允许重新登记**，必须另存 `-v2`。这是唯一能发现"有人偷偷改证据"的机制。
+
+## 需求分析员：翻译稿
 
 用 [templates/REQ-translation-template.md](templates/REQ-translation-template.md)，8 段缺一不可：
 
-```
-python skills/sk-req-validate/validate.py --doc requirements/normalized/REQ-20261122-01.md
+```bash
+python skills/sk-req-validate/validate.py \
+  --doc "requirements/需求分析员/渠道GMV日报需求20261122/REQ-20261122-01.md"
 ```
 
-这条命令就是 G1。它拦的是四类东西：段没写全、待确认项非空、引用了本体里不存在的 id、验收标准不可断言。
+这条命令就是 G1。它拦四类东西：段没写全、待确认项非空、引用了本体里不存在的 id、验收标准不可断言。
 
+翻译稿里**「待确认项」不为空就不许开工**——让开发者去猜口径，等于把返工提前变成必然。
 
 ## 流转
 
 ```
-inbox/REQ-xxx.md
-   │  P0 需求入库（登记 + hash）              gate G0
+反馈者/<需求目录>/REQ-xxx.md                原话 + 来源 + sha256
+   │  P0 需求入库                              gate G0（+ check_layout）
    ▼
-normalized/REQ-xxx.md（翻译稿，8 段齐全）
+需求分析员/<需求目录>/REQ-xxx.md            8 段合同，待确认项为空
    │  P1 需求翻译                              gate G1（含 HITL：口径确认）
    ▼
-两条独立开发轨（P2，互不可见）
-   │
+需求开发员/<需求目录>/developer-1/  ∥  developer-2/     互不可见
+   │  P2 双轨开发                              gate G2
    ▼
-P3 监督比对 → 合格脚本 + 对比报告 + 裁决书
+需求开发员/<需求目录>/监督者/{comparison.md,verdict.md,final/}
+   │  P3 监督比对                              gate G3（含 HITL：方案裁决）
+   ▼
+P4 质量规则 → P5 血缘调度 → P6 文档交付
 ```
 
-翻译稿里**「待确认项」不为空就不许开工**——这是 G1 最重要的一条。让开发者去猜口径，等于把返工提前变成了必然。
+同一个需求从提出到上线，所有东西都在这一个目录名下；跨需求找东西靠 `_registry.jsonl`。

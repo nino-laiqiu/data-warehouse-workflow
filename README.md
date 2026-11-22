@@ -30,14 +30,14 @@
 一个人写一个人自检，发现不了"口径理解偏差"——两份 SQL 都能跑，数字差 3%，谁也不知道谁对。
 双轨的代价是成本 ×2，所以只用在建表和指标口径这类一次做错、长期返工的事上。
 
-追踪者（`chronicler`）横切全程，把每次对话、每次修改、每次门禁判定写进 `runs/<run_id>/journal.jsonl`。
+追踪者（`chronicler`）横切全程，把每次对话、每次修改、每次门禁判定写进 `requirements/需求开发员/<需求目录>/journal.jsonl`。
 
 ## 目录地图
 
 | 目录 | 作用 | 谁写 | 规则 |
 |---|---|---|---|
 | `docs/` | 设计文档 | 人 | 参考物，不参与校验 |
-| `requirements/` | `inbox/` 原始需求（只增不改）+ `normalized/` 翻译稿 | 需求方 / 翻译者 | 原始文件不许改，改了就没法回溯 |
+| `requirements/` | `反馈者/` `需求分析员/` `需求开发员/` 三个角色目录，**每个需求一个同名子目录** | 需求方 / 翻译者 / 开发者 | 不许平铺；目录名 `<短名>需求<YYYYMMDD>`；原件不许改 |
 | `ontology/` | 对象 / 过程 / 指标 / 关系 / 约束 | 本体管理员（唯一） | 其余角色只读；改动只能走 `ontology_delta` |
 | `knowledge/` | LLM 知识库：规范 / 方言 / 范例 / 踩坑；`wiki/` 是表与词根的索引页 | 任何人提 PR | 只回答"怎么写"，不定义口径 |
 | `memory/` | 长期记忆：决策、口径裁决、评审结论 | 编排器 | 追加式，只增不改 |
@@ -46,7 +46,7 @@
 | `contracts/` | 阶段交付物 JSON Schema | 架构 | 缺字段即硬失败 |
 | `flow/` | 状态机 + 门禁 + **每个 stage 调用哪些技能** | 架构 | 技能调用关系只在这里维护 |
 | `templates/` | DDL / DML / DAG / 文档模板 | 开发者 | 被 skills 引用，不单独使用 |
-| `runs/` | 单次运行的产物与指纹 | 机器 | 不入库（`.gitignore`） |
+| `runs/` | A 线临时 run；B 线不用它（run 目录 = 需求目录） | 机器 | 不入库（`.gitignore`） |
 | `tools/` | 工程脚本（同步、校验） | 开发者 | — |
 
 ## 三条硬边界
@@ -62,16 +62,16 @@
 python skills/sk-req-register/validate.py
 
 # 0.5 G1 翻译稿可开工校验（8 段 / 待确认项为空 / 本体引用真实）
-python skills/sk-req-validate/validate.py --doc requirements/normalized/REQ-20261122-01.md
+python skills/sk-req-validate/validate.py --doc requirements/需求分析员/渠道GMV日报需求20261122/REQ-20261122-01.md
 
 # 1. 校验本体（纯标准库，无 LLM 依赖，CI 可直接跑）
 python ontology/schema/validate.py
 
 # 2. 校验契约（标准库实现的 JSON Schema 子集）
-python tools/validate_contracts.py runs/<run_id>/intent.json --schema contracts/intent.schema.json
+python tools/validate_contracts.py requirements/需求开发员/<需求目录>/model_design.json --schema contracts/model_design.schema.json
 
 # 3. 校验 skill 产物：输入契约 + 生成的 SQL 一起查
-python skills/sk-sql-ddl/validate.py --input runs/<run_id>/model_design.json --sql out.sql
+python skills/sk-sql-ddl/validate.py --input requirements/需求开发员/<需求目录>/model_design.json --sql out.sql
 
 # 4. git push 不通时的备用上传通道（走 GitHub API）
 node tools/push_file.mjs README.md README.md "docs: update readme"
@@ -81,13 +81,16 @@ python tools/check_wiki.py
 
 # 6. 校验技能引用：工作流里写了什么技能，就必须有什么目录（反过来也查）
 python tools/check_skills.py
+
+# 7. 校验需求目录布局：三个角色目录同名、开发目录结构齐全、没有平铺
+python tools/check_layout.py
 ```
 
-五个校验器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
+八个校验器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
 
 ## 当前状态
 
-**v0.4 —— B 线改为双轨制，骨架与本体已落地，契约待填内容。**
+**v0.5 —— 需求按"角色目录 + 每需求子目录"组织，双轨制跑通第一个需求。**
 
 | 阶段 | 产出 | 状态 |
 |---|---|---|
@@ -96,9 +99,9 @@ python tools/check_skills.py
 | M1 本体 + 知识库 | `ontology/` `knowledge/` 填内容 | ✅ 14 个本体文件 + 6 页 wiki |
 | M2 角色与流程 | `requirements/` `agents/`(11 角色) `flow/`(P0–P6 / G0–G6) | ✅ 本版（双轨制） |
 | M2a A 线最小闭环 | `skills/sk-qry-*` | 未开始 |
-| M2b B 线 Skills | `skills/sk-req-*` `sk-sql-*` `sk-ont-validate` | 未开始（仅 sk-sql-ddl 已实现） |
+| M2b B 线 Skills | `skills/sk-req-*` `sk-sql-*` `sk-ont-validate` | 部分（已实现 sk-req-register / sk-req-validate / sk-sql-ddl） |
 | M3 契约落地 | `contracts/` 9 个 schema | 未开始（模板 + 2 个已写） |
-| M4 电商域闭环 | `runs/` | 未开始 |
+| M4 电商域闭环 | `requirements/需求开发员/画像标签需求20261122/` | P0–P3 已跑通（REQ-20261122-02） |
 
 先读设计文档第 7 章（两条流水线）。注意：第 9 章的端到端走查是用 Push 域写的（比电商复杂），
 本仓库的模板实现换成**电商交易域**——结构一样，但更适合当起点。
