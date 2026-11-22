@@ -58,6 +58,12 @@
 ## 快速开始
 
 ```bash
+# 0. B 线入口：G0 原始需求对账（未登记 / hash 不一致 / 模板缺段都会拦）
+python skills/sk-req-register/validate.py
+
+# 0.5 G1 翻译稿可开工校验（8 段 / 待确认项为空 / 本体引用真实）
+python skills/sk-req-validate/validate.py --doc requirements/normalized/REQ-20261122-01.md
+
 # 1. 校验本体（纯标准库，无 LLM 依赖，CI 可直接跑）
 python ontology/schema/validate.py
 

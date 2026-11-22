@@ -28,8 +28,35 @@ normalized/REQ-20261122-01.md     # 翻译稿，front matter 里引用原始文�
 1. **必须写来源**：提出人、渠道（群/邮件/会议）、时间。写"来源不详"的需求一律不收。
 2. **不许改**：改了就没有证据价值。修订 = 新文件。
 3. **不许删**：被撤销的需求标记 `status: withdrawn`，文件留着。
-4. **必须算 hash**：`sk-req-register` 会算 `sha256` 写进 journal，用于事后证明"翻译稿基于哪个版本"。
-5. **必须用模板**：见 [templates/REQ-template.md](templates/REQ-template.md)，缺段落在 P0 门禁就拦。
+4. **必须算 hash**：`sk-req-register` 会算 `sha256` 写进 `_registry.jsonl`，用于事后证明"翻译稿基于哪个版本"。
+5. **必须用模板**：见 [templates/REQ-template.md](templates/REQ-template.md)，缺段落在 G0 门禁就拦。
+
+## 登记簿：`inbox/_registry.jsonl`
+
+Append-only，一行一条。它是唯一能回答"这份原件有没有被人改过"的地方：
+
+```bash
+# 登记（幂等：重复登记不会写第二行）
+python skills/sk-req-register/register.py \
+  --path requirements/inbox/REQ-20261122-01.md \
+  --proposer 张敏 --channel 钉钉-数据需求群 --submitted-at 2026-11-22T10:12
+
+# G0 门禁：对账（原件 hash 变了、没登记、模板缺段，全部拦）
+python skills/sk-req-register/validate.py
+```
+
+改过原件的文件**不允许重新登记**——必须另存 `-v2`。这是唯一能发现"有人偷偷改证据"的机制。
+
+## 翻译稿
+
+用 [templates/REQ-translation-template.md](templates/REQ-translation-template.md)，8 段缺一不可：
+
+```
+python skills/sk-req-validate/validate.py --doc requirements/normalized/REQ-20261122-01.md
+```
+
+这条命令就是 G1。它拦的是四类东西：段没写全、待确认项非空、引用了本体里不存在的 id、验收标准不可断言。
+
 
 ## 流转
 

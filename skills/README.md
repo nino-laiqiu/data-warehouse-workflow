@@ -67,8 +67,8 @@ owner: model-designer
 
 | 技能 | 线 | 被哪个 stage 调用 | 做什么 | 状态 |
 |---|---|---|---|---|
-| `sk-req-register` | B | P0 | 登记原始需求：校验模板、算 sha256、生成编号 | 待建 |
-| `sk-req-validate` | B | P1 | 翻译稿 8 段齐全、「待确认项」为空 | 待建 |
+| `sk-req-register` | B | P0 | 登记原始需求：校验模板、算 sha256、生成编号 | ✅ 已实现 |
+| `sk-req-validate` | B | P1 | 翻译稿 8 段齐全、「待确认项」为空 | ✅ 已实现 |
 | `sk-ont-validate` | B | P1 | 引用的本体 id 存在且未 deprecated | 待建 |
 | `sk-sql-ddl` | 共用 | P2 | 表设计 → Hive DDL | ✅ 已实现 |
 | `sk-sql-dml` | 共用 | P2 | 指标口径 → 聚合 DML | 待建 |
