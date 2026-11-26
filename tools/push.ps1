@@ -109,7 +109,7 @@ if ($outText -and $outText.Trim()) { Write-Host $outText.TrimEnd() }
 if ($errText -and $errText.Trim()) { Write-Host $errText.TrimEnd() }
 
 # 判成败同样不看 ExitCode：成功时脚本会打印 "OK <branch> -> <sha>"
-if ($outText -notmatch '^OK ') {
+if ($outText -notmatch 'OK\s+\S+\s*->') {
   throw '推送失败：node 没有输出 OK（看上面的错误信息）'
 }
 
