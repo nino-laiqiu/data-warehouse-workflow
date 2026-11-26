@@ -73,8 +73,8 @@ python tools/validate_contracts.py requirements/<需求目录>/需求开发员/m
 # 3. 校验 skill 产物：输入契约 + 生成的 SQL 一起查
 python skills/sk-sql-ddl/validate.py --input requirements/<需求目录>/需求开发员/model_design.json --sql out.sql
 
-# 4. git push 不通时的备用上传通道（走 GitHub API）
-node tools/push_file.mjs README.md README.md "docs: update readme"
+# 4. 写入 GitHub：走 API 通道，不用 git push（细节见 docs/推送流程.md）
+& .\tools\push.ps1 -Message "feat: 改了什么" -All
 
 # 5. 校验 wiki 内部链接（改完 wiki 必跑）
 python tools/check_wiki.py
@@ -96,6 +96,8 @@ python tools/dq_to_sql.py requirements/画像标签需求20261122/需求开发�
 ```
 
 十个校验器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
+
+推送通道的原理、失败排查表、新窗口冷启动清单，见 [`docs/推送流程.md`](docs/推送流程.md)。
 
 ## 当前状态
 
