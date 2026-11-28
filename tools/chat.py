@@ -339,7 +339,9 @@ def serve(port: int) -> int:
                     req_id = self.path.split("/")[3]
                     self._send(200, act_review_answer(req_id, data["qa_id"], data["text"], data.get("by", "需求方")))
                 elif self.path == "/v1/task":
-                    self._send(200, act_task(data["role"], data["req_id"], data.get("stage", "")))
+                    res = act_task(data["role"], data["req_id"], data.get("stage", ""))
+                    # 顺序不满足（例如监督者提前派活）不是客户端的错，是"还没到时候" → 409
+                    self._send(200 if res.get("ok") else 409, res)
                 else:
                     self._send(404, {"error": "unknown endpoint"})
             except Exception as exc:  # 界面不能因为一个坏请求挂掉
