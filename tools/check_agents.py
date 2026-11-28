@@ -2,7 +2,7 @@
 """校验 agents/roles.json 与 flow/pipeline.yaml、flow/gates.yaml 的一致性。
 
 查的是"角色定义"这一层，不是角色写得对不对：
-  1. 结构：必填字段、id 规范、id 不重复、tools 取自词表、stages 取自 P0–P6 / A1–A6 / ALL
+  1. 结构：必填字段、id 规范、id 不重复、tools 取自词表、stages 取自 P0–P6（含 P3B）/ A1–A6 / ALL
   2. 分工：任何角色都不能直接写 ontology/（只有人能改）；developer-1 与 developer-2 必须互设 must_not_read
   3. 接线：pipeline 里出现的 agent 必须在 roles.json 里；每个 stage 必须有人负责（ALL 不算）
   4. 门禁：role.gate 必须在 gates.yaml 里真的存在
@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parent.parent
 ROLES = ROOT / "agents" / "roles.json"
 PIPELINE = ROOT / "flow" / "pipeline.yaml"
 GATES = ROOT / "flow" / "gates.yaml"
-STAGE_RE = re.compile(r"^(P[0-6]|A[1-6])$")
+STAGE_RE = re.compile(r"^(P[0-6][A-Z]?|A[1-6])$")
 ID_RE = re.compile(r"^[a-z][a-z0-9-]{2,31}$")
 REQUIRED = ["id", "name", "stages", "gate", "tools", "writes", "notes"]
 
@@ -103,11 +103,11 @@ def main() -> int:
     for r in roles:
         for st in r.get("stages", []):
             if st == "ALL":
-                for s in ["P0", "P1", "P2", "P3", "P4", "P5", "P6", "A1", "A2", "A3", "A4", "A5", "A6"]:
+                for s in ["P0", "P1", "P2", "P3", "P3B", "P4", "P5", "P6", "A1", "A2", "A3", "A4", "A5", "A6"]:
                     covered.setdefault(s, []).append(r["id"])
             else:
                 covered.setdefault(st, []).append(r["id"])
-    for st in ["P0", "P1", "P2", "P3", "P4", "P5", "P6"]:
+    for st in ["P0", "P1", "P2", "P3", "P3B", "P4", "P5", "P6"]:
         if st not in covered:
             warns.append(f"stage {st} 没有常驻角色（可在 pipeline 里标「无（skill 直调）」）")
 

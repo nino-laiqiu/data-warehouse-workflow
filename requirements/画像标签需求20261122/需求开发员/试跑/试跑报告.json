@@ -1,0 +1,118 @@
+{
+  "run_id": "R-20261128133359",
+  "stage": "P3B",
+  "payload": {
+    "requirement_id": "REQ-20261122-02",
+    "generated_at": "2026-11-28T13:33:59",
+    "environment": {
+      "mode": "offline",
+      "engine": "hive",
+      "target": "（未指定）",
+      "target_is_sandbox": false
+    },
+    "scripts": [
+      {
+        "path": "requirements\\画像标签需求20261122\\需求开发员\\监督者\\final\\01_dws_user_profile_df.sql",
+        "kind": "ddl",
+        "sha256": "91465e5ab95d8da073373f91631f87c7fdf59038ae1183ca4d53e59081e69403",
+        "status": "not_run"
+      },
+      {
+        "path": "requirements\\画像标签需求20261122\\需求开发员\\监督者\\final\\02_dim_tag_df.sql",
+        "kind": "ddl",
+        "sha256": "32dabb36e6dd4e849fae88a12c8dec48fbebe915e7d5606aa706e48a5b6afb4b",
+        "status": "not_run"
+      },
+      {
+        "path": "requirements\\画像标签需求20261122\\需求开发员\\监督者\\final\\03_etl_dws_user_profile_df.sql",
+        "kind": "dml",
+        "sha256": "270802691d4b3bb9a40631fa652ad7bce1c3b25c012f17e644d380f6cd8d42ef",
+        "status": "not_run"
+      },
+      {
+        "path": "requirements\\画像标签需求20261122\\需求开发员\\监督者\\final\\04_dim_tag_df_data.sql",
+        "kind": "dml",
+        "sha256": "0e7eed08a9faa53cf61607074c66c35b3f0484e891575a846f8e3c3c1d8d7ffc",
+        "status": "not_run"
+      }
+    ],
+    "checks": [
+      {
+        "id": "T001",
+        "name": "环境连通（SELECT 1）",
+        "category": "structure",
+        "sql": "SELECT 1",
+        "expect": {
+          "type": "equals",
+          "value": 1
+        },
+        "verdict": "skip",
+        "evidence": "离线模式：未连环境，没有任何执行证据"
+      },
+      {
+        "id": "T101",
+        "name": "DDL 可解释：01_dws_user_profile_df.sql",
+        "category": "executable",
+        "verdict": "skip",
+        "evidence": "离线模式：未连环境，没有任何执行证据"
+      },
+      {
+        "id": "T102",
+        "name": "DDL 可解释：02_dim_tag_df.sql",
+        "category": "executable",
+        "verdict": "skip",
+        "evidence": "离线模式：未连环境，没有任何执行证据"
+      },
+      {
+        "id": "T201",
+        "name": "DML 可解释：03_etl_dws_user_profile_df.sql",
+        "category": "executable",
+        "verdict": "skip",
+        "evidence": "离线模式：未连环境，没有任何执行证据"
+      },
+      {
+        "id": "T202",
+        "name": "DML 可解释：04_dim_tag_df_data.sql",
+        "category": "executable",
+        "verdict": "skip",
+        "evidence": "离线模式：未连环境，没有任何执行证据"
+      },
+      {
+        "id": "T301",
+        "name": "目标表当日有数据",
+        "category": "quality",
+        "sql": "SELECT COUNT(1) FROM dws_user_profile_df WHERE dt = '${dt}'",
+        "expect": {
+          "type": "min_rows",
+          "value": 1
+        },
+        "verdict": "skip",
+        "evidence": "离线模式：未连环境，没有任何执行证据"
+      },
+      {
+        "id": "T302",
+        "name": "主键唯一（取 DQ 规则）",
+        "category": "quality",
+        "sql": "SELECT COUNT(1) FROM (SELECT user_id FROM dws_user_profile_df WHERE dt = '${dt}' GROUP BY user_id HAVING COUNT(1) > 1) t",
+        "expect": {
+          "type": "zero_value"
+        },
+        "verdict": "skip",
+        "evidence": "离线模式：未连环境，没有任何执行证据"
+      },
+      {
+        "id": "T303",
+        "name": "与上游对账（取 DQ 规则）",
+        "category": "reconcile",
+        "sql": "SELECT COUNT(1) FROM dws_user_profile_df WHERE dt = '${dt}' AND purchase_is_repurchase = '未购' AND (purchase_order_cnt_30d <> '0' OR purchase_last_pay_days <> '未购' OR purchase_aov_band <> '未购' OR purchase_first_order_days <> '未购')",
+        "expect": {
+          "type": "zero_value"
+        },
+        "verdict": "skip",
+        "evidence": "离线模式：未连环境，没有任何执行证据"
+      }
+    ],
+    "verdict": "blocked",
+    "notes": "离线试跑：只列出计划，不产生证据。这不是通过——G3B 要求真连环境跑一遍，或用 waiver 由人签放行并记待办。"
+  }
+}

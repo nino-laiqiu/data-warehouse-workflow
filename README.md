@@ -144,14 +144,19 @@ python tools/journal.py todos --req 画像标签需求20261122
 python tools/journal.py check --req 画像标签需求20261122
 python tools/journal.py show  --req 画像标签需求20261122 --tail 10
 
-# 21. 对话界面（P1）：CLI 与本地 HTTP 共用一套契约，四个动作
+# 21. 试跑质检（P3B）：把 final/ 脚本放进环境跑一遍；--check 是 G3B 门禁
+python tools/trial_run.py --req 画像标签需求20261122                    # 离线：只出计划，blocked
+python tools/trial_run.py --req 画像标签需求20261122 --mode sandbox --target dw_tmp_profile --dt 20261127 --execute
+python tools/trial_run.py --req 画像标签需求20261122 --check            # G3B：blocked 且无豁免就不放行
+
+# 22. 对话界面（P1）：CLI 与本地 HTTP 共用一套契约，四个动作
 python tools/chat.py chat "近30天城市等级支付用户数"        # → SQL + caveats + 落一条 qa_record
 python tools/chat.py journal --run R-1 --type gate         # → 只看门禁事件
 python tools/chat.py task --role developer-1 --req 画像标签需求20261122 --stage P2
 python tools/chat.py serve --port 8765                     # 同契约的本地 HTTP（POST /v1/chat 等四端点）
 ```
 
-十六个校验器（另有问答沉淀与候选转正两条链路） + 需求雷达 + 调度执行器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
+十七个校验器（另有问答沉淀与候选转正两条链路） + 需求雷达 + 调度执行器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
 
 推送通道的原理、失败排查表、新窗口冷启动清单，见 [`docs/推送流程.md`](docs/推送流程.md)。
 角色怎么被 subagent 真跑，见 [`docs/角色运行.md`](docs/角色运行.md)；

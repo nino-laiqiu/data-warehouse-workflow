@@ -1,0 +1,56 @@
+{
+  "run_id": "R-20261128-example",
+  "stage": "P3B",
+  "payload": {
+    "requirement_id": "REQ-20261122-02",
+    "generated_at": "2026-11-28T13:40:00+08:00",
+    "environment": {
+      "mode": "offline",
+      "engine": "hive",
+      "target": "（未指定）",
+      "target_is_sandbox": false
+    },
+    "scripts": [
+      {
+        "path": "requirements/画像标签需求20261122/需求开发员/监督者/final/01_dws_user_profile_df.sql",
+        "kind": "ddl",
+        "sha256": "91465e5ab95d8da073373f91631f87c7fdf59038ae1183ca4d53e59081e69403",
+        "status": "not_run"
+      },
+      {
+        "path": "requirements/画像标签需求20261122/需求开发员/监督者/final/03_etl_dws_user_profile_df.sql",
+        "kind": "dml",
+        "sha256": "270802691d4b3bb9a40631fa652ad7bce1c3b25c012f17e644d380f6cd8d42ef",
+        "status": "not_run"
+      }
+    ],
+    "checks": [
+      {
+        "id": "T001",
+        "name": "环境连通（SELECT 1）",
+        "category": "structure",
+        "sql": "SELECT 1",
+        "expect": {
+          "type": "equals",
+          "value": 1
+        },
+        "verdict": "skip",
+        "evidence": "离线模式：未连环境，没有任何执行证据"
+      },
+      {
+        "id": "T301",
+        "name": "目标表当日有数据",
+        "category": "quality",
+        "sql": "SELECT COUNT(1) FROM dws_user_profile_df WHERE dt = '${dt}'",
+        "expect": {
+          "type": "min_rows",
+          "value": 1
+        },
+        "verdict": "skip",
+        "evidence": "离线模式：未连环境，没有任何执行证据"
+      }
+    ],
+    "verdict": "blocked",
+    "notes": "离线试跑：只列出计划，不产生证据。这不是通过——G3B 要求真连环境跑一遍，或用 waiver 由人签放行并记待办。"
+  }
+}

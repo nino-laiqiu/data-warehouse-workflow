@@ -59,6 +59,18 @@ lane_b:
     check: python tools/check_dual_track.py --req requirements/<需求目录>
     on_fail: 退回 P3 重新比对；口径冲突则退回 P1
 
+  - id: G3B
+    name: 试跑通过
+    type: auto
+    checks:
+      - 环境连得上（SELECT 1 有返回；连不上就是 blocked，不许写 passed）
+      - final/ 每条脚本都被引擎解释过（EXPLAIN 通过），写操作在沙箱库里真执行过
+      - 结果过得去：目标表当日有行、主键唯一、与上游对账在阈值内
+      - 目标库必须是沙箱（名字含 tmp/shadow/dev/试跑 等），正式库禁止试跑
+      - blocked 只能靠 waiver（reason + approved_by + expires_at）放行，且必须记待办
+    check: python tools/trial_run.py --req <需求目录> --check
+    on_fail: 退回 P3 修 final/；环境问题记待办并停在 G3B，不许往下走
+
   - id: G4
     name: 质量规则就绪
     type: auto

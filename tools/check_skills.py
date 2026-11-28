@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SKILLS_DIR = ROOT / "skills"
 PIPELINE = ROOT / "flow" / "pipeline.yaml"
 
-STAGE_RE = re.compile(r"^\s*-\s+id:\s*([AP]\d+)\s*$")
+STAGE_RE = re.compile(r"^\s*-\s+id:\s*([AP]\d+[A-Z]?)\s*$")
 SKILLS_RE = re.compile(r"^\s+skills:\s*\[(.*?)\]\s*$")
 
 

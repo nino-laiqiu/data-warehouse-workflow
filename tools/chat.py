@@ -302,6 +302,12 @@ def act_task(role: str, req: str, stage: str) -> dict:
             return {"ok": False, "role": role, "stage": stage, "prompt_path": None,
                     "detail": "不派活：监督者必须在两轨都完成后开始（P3 depends_on P2）。缺：" + "；".join(gaps)}
 
+    if stage == "P3B":
+        finals = list((ROOT / "requirements" / req / "需求开发员" / "监督者" / "final").glob("*.sql"))
+        if not finals:
+            return {"ok": False, "role": role, "stage": stage, "prompt_path": None,
+                    "detail": "不派活：P3B 试跑要跑的是 监督者/final/*.sql，现在还没有（G3 未产出裁决版本）"}
+
     cmd = [PY, str(ROOT / "tools" / "role_prompt.py"), "--role", role, "--req", req, "--write"]
     r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
     prompt_path = None

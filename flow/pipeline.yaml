@@ -55,6 +55,16 @@ lane_b_develop:
       depends_on: [P2]
       # P3 必须等两轨都完成：监督者不与开发者并行，否则它比的是半成品
 
+    - id: P3B
+      name: 试跑质检
+      agent: developer-1              # 裁决后隔离解除：由实现者把 final/ 放进环境里真跑一遍
+      skills: [sk-trial-run]
+      in: requirements/<需求目录>/需求开发员/监督者/final/*.sql + 可执行环境（沙箱库 / HQL_CMD）
+      out: requirements/<需求目录>/需求开发员/试跑/{试跑报告.json, 试跑报告.md}
+      gate: G3B
+      depends_on: [P3]
+      # 顺序：G3 裁决通过就立刻试跑。跑不动的东西没有资格谈质量规则和排期
+
     - id: P4
       name: 质量规则
       agent: requirement-translator   # 验收标准 → 可执行规则，仍属定义侧
@@ -62,7 +72,7 @@ lane_b_develop:
       in: final/ + metric_spec
       out: dq_rules
       gate: G4
-      depends_on: [P3]
+      depends_on: [P3B]
 
     - id: P5
       name: 血缘与调度

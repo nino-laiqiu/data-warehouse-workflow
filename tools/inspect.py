@@ -22,7 +22,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-GATES = ["G0", "G1", "G2", "G3", "G4", "G5", "G6"]
+GATES = ["G0", "G1", "G2", "G3", "G3B", "G4", "G5", "G6"]
 HITL = {"G1": "H1 口径确认", "G3": "H2 裁决评审", "G5": "H3 上线放行"}
 DESIGNED_CONTRACTS = [
     "intent", "analysis", "requirement", "ontology_delta", "model_design",
@@ -93,6 +93,9 @@ def build_checks() -> list[dict]:
         d = dev_dir(req)
         if not d:
             continue
+        for f in sorted(d.rglob("试跑报告.json")):
+            add(f"试跑质检 G3B {req.name}", "门禁",
+                py("tools", "trial_run.py") + ["--req", req.name, "--check"])
         for f in sorted(d.rglob("dq_rules.json")):
             add(f"质量规则 G4 {req.name}", "门禁", py("tools", "check_dq.py") + [rel(f)])
         for f in sorted(d.rglob("lineage.json")):

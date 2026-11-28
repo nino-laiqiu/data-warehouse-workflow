@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PIPELINE = ROOT / "flow" / "pipeline.yaml"
 GATES = ROOT / "flow" / "gates.yaml"
 
-STAGE_RE = re.compile(r"^\s*-\s+id:\s*([AP]\d+)\s*$")
+STAGE_RE = re.compile(r"^\s*-\s+id:\s*([AP]\d+[A-Z]?)\s*$")
 KV_RE = re.compile(r"^\s+([a-z_]+):\s*(.*?)\s*$")
 
 
