@@ -12,7 +12,8 @@ __pycache__/
 
 # 本机插件包（体积大，且是本地环境产物）
 dsh-plugins/*.tgz
-dsh-plugins/*/node_modules/
+dsh-plugins/*/.data/
+node_modules/
 
 # 凭据永远不入库
 .credentials*

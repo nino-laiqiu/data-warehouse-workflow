@@ -127,14 +127,21 @@ python tools/req_review.py confirm --req-id REQ-20261122-02
 # 18. 现网验证：把 DQ 断言拿到生产库跑一遍（--offline 只出待执行清单，不能当放行依据）
 python tools/verify_live.py --req 画像标签需求20261122 --offline
 
-# 19. 追踪：追加六类事件 / 看未关待办 / 校验全部事件 / 回放最近几条
+# 19. 问答沉淀：入库 → 挖候选 → 转正（分析师问答是知识库最好的原料）
+python tools/qa_store.py init
+python tools/qa_store.py ingest --file data/qa/sample.jsonl
+python tools/qa_store.py stats
+python tools/qa_mine.py --week 2026-W48
+python tools/qa_promote.py --list
+
+# 20. 追踪：追加六类事件 / 看未关待办 / 校验全部事件 / 回放最近几条
 python tools/journal.py append --req 画像标签需求20261122 --type query --actor chronicler   --sql-file .tmp/smoke.sql --purpose "核对 GMV 与 ADS 一致性" --result "差异 0.003%"
 python tools/journal.py todos --req 画像标签需求20261122
 python tools/journal.py check --req 画像标签需求20261122
 python tools/journal.py show  --req 画像标签需求20261122 --tail 10
 ```
 
-十五个校验器 + 需求雷达 + 调度执行器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
+十五个校验器（另有问答沉淀与候选转正两条链路） + 需求雷达 + 调度执行器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
 
 推送通道的原理、失败排查表、新窗口冷启动清单，见 [`docs/推送流程.md`](docs/推送流程.md)。
 角色怎么被 subagent 真跑，见 [`docs/角色运行.md`](docs/角色运行.md)；定时怎么接，见 [`docs/调度.md`](docs/调度.md)。

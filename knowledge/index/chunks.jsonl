@@ -6,3 +6,4 @@
 {"id": "k-0006", "path": "wiki/05-取数路径.md", "title": "取数决策树：先选表再写 SQL", "tags": ["routing", "query", "ads"], "verified_by": null, "sha256": "a16747c871812c3b7d200a5847c4b893f7b849e5af21a16be5360f04e4f916f3", "updated": "2026-11-28"}
 {"id": "k-0007", "path": "04_踩坑/hive-partition-duplicate-column.md", "title": "hive-partition-duplicate-column", "tags": [], "verified_by": null, "sha256": "7ee40a31aedb79c33f6756e941f26eddc7ed82340c35b4ec1a5b32a8e50c9d0a", "updated": "2026-11-28"}
 {"id": "k-0010", "path": "wiki/README.md", "title": "README", "tags": [], "verified_by": null, "sha256": "f9d58ee14f8eaa3472d5b1fdbbec0c293fba498c69e829bf6377af73d9c81470", "updated": "2026-11-28"}
+{"id": "k-0011", "path": "04_踩坑/aov-vs-arpu.md", "title": "aov-vs-arpu", "tags": [], "verified_by": null, "sha256": "8ba6a979f687884011f8530dbc07f92703931c3cd1dd1a3b64c5071b90dff064", "updated": "2026-11-28"}

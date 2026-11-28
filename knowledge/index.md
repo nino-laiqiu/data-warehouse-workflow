@@ -30,3 +30,4 @@
 |---|---|---|---|---|
 | 2026-11-22 | `wiki/*.md` | 建立知识库：词根、指标、10 张事实表、6 张维表、取数路径 | 无（初建） | 人 |
 | 2026-11-28 | `04_踩坑/hive-partition-duplicate-column.md` | 补充「检查落在哪」：check_partition_not_in_columns 的实现位置 + 纯 SQL 模式也生效 + 反例文件 | knowledge/index.md | 人 |
+| 2026-11-28 | `04_踩坑/aov-vs-arpu.md` | 新增：客单价 AOV 与人均消费额 ARPU 的区分（来自问答沉淀 C-20261128-01） | 无引用 | 人 |
