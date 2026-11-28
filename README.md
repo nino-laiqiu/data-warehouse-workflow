@@ -173,7 +173,7 @@ python tools/chat.py serve --port 8765                     # 同契约的本地 
 | M2 角色与流程 | `requirements/` `agents/`(5 角色) `flow/`(P0–P6 / G0–G6) | ✅ 本版（双轨制） |
 | M2a A 线最小闭环 | `skills/sk-qry-*` | 未开始 |
 | M2b B 线 Skills | `skills/sk-req-*` `sk-sql-*` `sk-ont-validate` | 部分（已实现 sk-req-register / sk-req-validate / sk-sql-ddl） |
-| M3 契约落地 | `contracts/` 9 个 schema | 部分（模板 + 5 个：comparison_report / journal_entry / dq_rules / lineage / ontology_delta） |
+| M3 契约落地 | `contracts/` 9 个设计契约 + 5 个附加契约 | ✅ 9/9（每个契约都有 example 且过校验） |
 | M4 电商域闭环 | `requirements/画像标签需求20261122/需求开发员/` | ✅ P0–P6 全跑通（REQ-20261122-02，H3 待人工放行） |
 | M4b 第二遍双轨 | `requirements/渠道GMV日报需求20261122/需求开发员/` | 🟡 P0–P3 跑通（subagent 真跑，H2 待裁决；G3 因 sk-sql-guard 无实现而挂起） |
 | M5 巡检器 | `tools/inspect.py` 一条命令出门禁矩阵 + 周报 | ✅ 12 项门禁，首份周报 `runs/inspection/2026-W48/` |

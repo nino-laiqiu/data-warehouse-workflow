@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://data-warehouse-workflow/contracts/analysis",
+  "title": "取数结论契约（A 线 A5 产出）",
+  "description": "把一次取数的 SQL、结果摘要和结论绑在一起。判据：结论里每一句都能指回一条 evidence；不许出现因果句式（claims[].type 里没有 causal 这个值）。",
+  "type": "object",
+  "required": ["run_id", "stage", "payload"],
+  "properties": {
+    "run_id": {"type": "string", "minLength": 4},
+    "stage": {"type": "string", "enum": ["A5"]},
+    "payload": {
+      "type": "object",
+      "required": ["intent_ref", "sql", "sql_hash", "columns", "caveats", "conclusion"],
+      "additionalProperties": false,
+      "properties": {
+        "intent_ref": {"type": "string", "minLength": 4, "description": "对应 intent 契约的 run_id"},
+        "question": {"type": "string", "minLength": 4},
+        "sql": {"type": "string", "minLength": 10},
+        "sql_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "engine": {"type": "string", "enum": ["hive", "spark", "presto", "duckdb", "other"]},
+        "columns": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["name", "type", "meaning"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {"type": "string", "minLength": 1},
+              "type": {"type": "string", "enum": ["string", "number", "date", "boolean"]},
+              "meaning": {"type": "string", "minLength": 2, "description": "中文口径，如「渠道 GMV（元）」"}
+            }
+          }
+        },
+        "row_count": {"type": "integer", "minimum": 0},
+        "caveats": {
+          "type": "array",
+          "description": "必须写的口径提醒，如「城市等级取的是注册地」；没有就留空数组，不许省略。",
+          "items": {"type": "string", "minLength": 4}
+        },
+        "conclusion": {
+          "type": "object",
+          "required": ["text", "claims", "confidence"],
+          "additionalProperties": false,
+          "properties": {
+            "text": {"type": "string", "minLength": 10},
+            "claims": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["id", "text", "type", "evidence"],
+                "additionalProperties": false,
+                "properties": {
+                  "id": {"type": "string", "pattern": "^C\\d{1,3}$"},
+                  "text": {"type": "string", "minLength": 6},
+                  "type": {"type": "string", "enum": ["observation", "comparison", "hypothesis"]},
+                  "evidence": {"type": "string", "minLength": 4, "description": "指向列名/行号/聚合值，不许写「根据经验」"}
+                }
+              }
+            },
+            "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+          }
+        },
+        "followups": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 6},
+          "description": "建议用户下一步验证的问题，写成可再问一次的问句"
+        }
+      }
+    }
+  }
+}

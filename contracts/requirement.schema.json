@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://data-warehouse-workflow/contracts/requirement",
+  "title": "需求契约（P1 需求翻译产出）",
+  "description": "P1 → P2 的交接物。判据：每条验收标准可断言（有字段、有比较、有数字）；度量与表都能对到本体与元数据；不在范围内的事写清楚。",
+  "type": "object",
+  "required": ["run_id", "stage", "payload"],
+  "properties": {
+    "run_id": {"type": "string", "minLength": 4},
+    "stage": {"type": "string", "enum": ["P1"]},
+    "payload": {
+      "type": "object",
+      "required": ["requirement_id", "source", "goal", "metrics", "tables_in", "tables_out", "boundaries", "acceptance", "excluded", "open_questions"],
+      "additionalProperties": false,
+      "properties": {
+        "requirement_id": {"type": "string", "pattern": "^REQ-\\d{8}-\\d{2}$"},
+        "title": {"type": "string", "minLength": 4},
+        "source": {
+          "type": "object",
+          "required": ["path", "sha256", "proposer", "channel", "proposed_at"],
+          "additionalProperties": false,
+          "properties": {
+            "path": {"type": "string", "pattern": "^requirements/.+\\.md$"},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "proposer": {"type": "string", "minLength": 1},
+            "channel": {"type": "string", "minLength": 2, "description": "需求从哪来的，如「DSH会话-m01233」「邮件」「周会」"},
+            "proposed_at": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}"}
+          }
+        },
+        "goal": {"type": "string", "minLength": 8, "description": "一句话目标，主语是可交付物而不是动作"},
+        "metrics": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["metric_id", "name_cn", "kind"],
+            "additionalProperties": false,
+            "properties": {
+              "metric_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+              "name_cn": {"type": "string", "minLength": 1},
+              "kind": {"type": "string", "enum": ["atomic", "derived"]},
+              "additivity": {"type": "string", "enum": ["additive", "semi_additive", "non_additive"]}
+            }
+          }
+        },
+        "tables_in": {
+          "type": "array", "minItems": 1,
+          "items": {"type": "string", "pattern": "^(ods|dwd|dws|ads|dim)_[a-z0-9_]+$"}
+        },
+        "tables_out": {
+          "type": "array", "minItems": 1,
+          "items": {"type": "string", "pattern": "^(ods|dwd|dws|ads|dim)_[a-z0-9_]+$"}
+        },
+        "grain": {"type": "string", "minLength": 4, "description": "如「一用户一天一行」"},
+        "boundaries": {
+          "type": "object",
+          "required": ["include"],
+          "additionalProperties": false,
+          "properties": {
+            "include": {"type": "array", "items": {"type": "string", "minLength": 2}},
+            "exclude": {"type": "array", "items": {"type": "string", "minLength": 2}}
+          }
+        },
+        "acceptance": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "statement", "assertion"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {"type": "string", "pattern": "^AC\\d{1,3}$"},
+              "statement": {"type": "string", "minLength": 6},
+              "assertion": {"type": "string", "minLength": 6, "description": "可断言的写法：字段 + 比较符 + 数字/枚举，如「行数 = dim_user_df 去重用户数」"}
+            }
+          }
+        },
+        "excluded": {"type": "array", "items": {"type": "string", "minLength": 4}, "description": "明确不做的事，防止下游自由发挥"},
+        "open_questions": {
+          "type": "array",
+          "description": "非阻断待确认项。阻断项必须为零，否则不许进 P2。",
+          "items": {
+            "type": "object",
+            "required": ["id", "text", "blocking"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {"type": "string", "pattern": "^Q\\d{1,3}$"},
+              "text": {"type": "string", "minLength": 4},
+              "blocking": {"type": "boolean"},
+              "owner": {"type": "string"}
+            }
+          }
+        },
+        "status": {"type": "string", "enum": ["draft", "ready", "confirmed"], "description": "只有 confirmed 才能作为 P2 的输入"}
+      }
+    }
+  }
+}

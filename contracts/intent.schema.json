@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://data-warehouse-workflow/contracts/intent",
+  "title": "意图契约（A 线 A1 产出）",
+  "description": "把分析师的一句自然语言问句，翻译成可被 A2 找数、A3 生成 SQL 的结构。判据：每个指标/维度都能对到本体 id；歧义要么被本体消解，要么显式进 ambiguities 且 blocking=true。",
+  "type": "object",
+  "required": ["run_id", "stage", "payload"],
+  "properties": {
+    "run_id": {"type": "string", "minLength": 4},
+    "stage": {"type": "string", "enum": ["A1"]},
+    "payload": {
+      "type": "object",
+      "required": ["question", "metrics", "dims", "time_window", "ambiguities"],
+      "additionalProperties": false,
+      "properties": {
+        "question": {"type": "string", "minLength": 4, "description": "用户原话，不做改写"},
+        "user_role": {"type": "string", "enum": ["分析师", "运营", "产品", "其他"]},
+        "metrics": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["metric_id", "name_cn", "confidence"],
+            "additionalProperties": false,
+            "properties": {
+              "metric_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+              "name_cn": {"type": "string", "minLength": 1},
+              "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+              "term_used_by_user": {"type": "string", "description": "用户嘴里的说法，如「成交额」，用于事后对齐口径"}
+            }
+          }
+        },
+        "dims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["dim_id", "name_cn", "source_table"],
+            "additionalProperties": false,
+            "properties": {
+              "dim_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+              "name_cn": {"type": "string", "minLength": 1},
+              "source_table": {"type": "string", "pattern": "^(ods|dwd|dws|ads|dim)_[a-z0-9_]+$"}
+            }
+          }
+        },
+        "time_window": {
+          "type": "object",
+          "required": ["mode", "dt_field"],
+          "additionalProperties": false,
+          "properties": {
+            "mode": {"type": "string", "enum": ["relative", "absolute", "none"]},
+            "expr": {"type": "string", "description": "相对口径，如「近30天」；mode=absolute 时写空串"},
+            "start": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+            "end": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+            "dt_field": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "归日字段，如 pay_time / dt"}
+          }
+        },
+        "filters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["field", "op", "value"],
+            "additionalProperties": false,
+            "properties": {
+              "field": {"type": "string", "minLength": 1},
+              "op": {"type": "string", "enum": ["=", "!=", ">", ">=", "<", "<=", "in", "not in"]},
+              "value": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        "ambiguities": {
+          "type": "array",
+          "description": "歧义清单。blocking=true 且 resolution=ask_human 时，A 线不许往下走（宁可不答）。",
+          "items": {
+            "type": "object",
+            "required": ["id", "text", "blocking", "resolution"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {"type": "string", "pattern": "^Q\\d{1,3}$"},
+              "text": {"type": "string", "minLength": 4},
+              "blocking": {"type": "boolean"},
+              "resolution": {"type": "string", "enum": ["ontology", "ask_human", "assume"]},
+              "note": {"type": "string"}
+            }
+          }
+        },
+        "assumptions": {"type": "array", "items": {"type": "string", "minLength": 4}},
+        "ontology_refs": {"type": "array", "items": {"type": "string"}, "description": "用到的本体文件，便于回溯口径来源"}
+      }
+    }
+  }
+}

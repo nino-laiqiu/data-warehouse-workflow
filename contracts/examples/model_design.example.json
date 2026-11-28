@@ -1,0 +1,37 @@
+{
+  "run_id": "P2-20261122-02-a",
+  "stage": "P2",
+  "payload": {
+    "requirement_id": "REQ-20261122-02",
+    "track": "a",
+    "target_table": "dws_user_profile_df",
+    "grain": ["user_id", "dt"],
+    "partition": {"field": "dt", "type": "string", "granularity": "day", "retention_days": 90},
+    "keys": [
+      {"field": "user_id", "role": "pk"},
+      {"field": "dt", "role": "dedup"}
+    ],
+    "columns": [
+      {"name": "user_id", "type": "bigint", "comment": "用户 ID", "source": "dim_user_df.user_id", "nullable": false},
+      {"name": "gender", "type": "string", "comment": "性别；缺失写 UNKNOWN，不推断", "source": "dim_user_df.gender", "nullable": false},
+      {"name": "age_range", "type": "string", "comment": "年龄段 <18/18-24/25-34/35-44/45+，按周岁；生日当天进新档", "source": "derived: dim_user_df.birthday", "nullable": false},
+      {"name": "city_level", "type": "string", "comment": "城市等级；当前取注册地，地址表接入后切收货地址", "source": "dim_user_df.city_level", "nullable": false},
+      {"name": "is_repurchase", "type": "string", "comment": "是否复购（终身口径）：是/否/未购", "source": "derived: dwd_order_main_di", "nullable": false},
+      {"name": "order_cnt_30d", "type": "bigint", "comment": "近30天支付订单数；未购写 0", "source": "derived: dwd_pay_flow_di", "nullable": false},
+      {"name": "gmv_30d", "type": "decimal(18,2)", "comment": "近30天 GMV（元）", "source": "derived: dwd_pay_flow_di.pay_amt", "nullable": false},
+      {"name": "aov_band", "type": "string", "comment": "客单价档位 <50/50-100/100-300/300-1000/1000+，左闭右开；未购写 未购", "source": "derived: gmv_30d / order_cnt_30d", "nullable": false},
+      {"name": "first_order_days", "type": "string", "comment": "首单距今天数档位 0-7/8-30/31-90/90+", "source": "derived: dwd_order_main_di", "nullable": false},
+      {"name": "last_pay_days", "type": "string", "comment": "最近一次支付距今天数档位", "source": "derived: dwd_pay_flow_di", "nullable": false},
+      {"name": "pref_cat_l1", "type": "string", "comment": "偏好品类（一级）：近30天支付金额 Top1，并列取 cate_l1_id 最小", "source": "derived: dwd_order_main_di + dim_product_df", "nullable": false},
+      {"name": "dt", "type": "string", "comment": "分区日期 yyyyMMdd", "source": "参数 ${dt}", "nullable": false}
+    ],
+    "sources": ["dim_user_df", "dwd_pay_flow_di", "dwd_order_main_di", "dim_product_df"],
+    "ddl_ref": "01_dws_user_profile_df.sql",
+    "etl_ref": "02_etl_dws_user_profile_df.sql",
+    "row_estimate": 12000000,
+    "tradeoffs": [
+      "选宽表而不是标签长表：圈人要对多标签做 AND，宽表一次扫描即可",
+      "13 列全部非空、缺失落 UNKNOWN/未购：牺牲「未知 vs 真无」的区分度，换取下游不用处理 NULL"
+    ]
+  }
+}

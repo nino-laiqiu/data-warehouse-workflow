@@ -1,0 +1,22 @@
+{
+  "run_id": "P4-20261122-02",
+  "stage": "P4",
+  "payload": {
+    "metric_id": "GMV",
+    "name_cn": "成交额",
+    "kind": "atomic",
+    "additivity": "additive",
+    "definition": "支付成功的订单金额合计。按 pay_time 归日；不含运费；退款不回冲（退款在 REFUND_RATE 里单独看）；排除 is_test = 1 的测试账号。",
+    "grain": ["dt"],
+    "time_field": "pay_time",
+    "source_tables": ["dwd_pay_flow_di"],
+    "unit": "元",
+    "filters": [
+      {"field": "is_test", "op": "=", "value": "0"},
+      {"field": "pay_status", "op": "in", "value": "paid"}
+    ],
+    "owner": "开发者1",
+    "status": "active",
+    "ontology_ref": "ontology/metric/atomic/gmv.yaml"
+  }
+}

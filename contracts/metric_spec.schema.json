@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://data-warehouse-workflow/contracts/metric_spec",
+  "title": "指标口径契约（P4 指标定义产出）",
+  "description": "一个指标一份。判据：口径能落成一条 SQL；加性写清楚（决定能不能 SUM 二次汇总）；同一指标不许有两份定义。",
+  "type": "object",
+  "required": ["run_id", "stage", "payload"],
+  "properties": {
+    "run_id": {"type": "string", "minLength": 4},
+    "stage": {"type": "string", "enum": ["P4"]},
+    "payload": {
+      "type": "object",
+      "required": ["metric_id", "name_cn", "kind", "additivity", "definition", "grain", "time_field", "source_tables", "owner", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "metric_id": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+        "name_cn": {"type": "string", "minLength": 1},
+        "kind": {"type": "string", "enum": ["atomic", "derived"]},
+        "additivity": {"type": "string", "enum": ["additive", "semi_additive", "non_additive"]},
+        "definition": {"type": "string", "minLength": 10, "description": "人能读懂的口径，必须写清分子分母、时间归属、是否含运费/退款"},
+        "formula": {"type": "string", "description": "派生指标必填，如 SUM(pay_amt) / COUNT(DISTINCT order_id)"},
+        "derived_from": {
+          "type": "array", "minItems": 2,
+          "items": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+          "description": "派生指标的原子指标，至少两个"
+        },
+        "grain": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 2}},
+        "time_field": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "归日字段，如 pay_time"},
+        "source_tables": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^(ods|dwd|dws|ads|dim)_[a-z0-9_]+$"}},
+        "unit": {"type": "string", "enum": ["元", "笔", "人", "次", "天", "%", "比率"]},
+        "filters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["field", "op", "value"],
+            "additionalProperties": false,
+            "properties": {
+              "field": {"type": "string", "minLength": 1},
+              "op": {"type": "string", "enum": ["=", "!=", "in", "not in", "is null", "is not null"]},
+              "value": {"type": "string", "minLength": 1}
+            }
+          },
+          "description": "口径内的固定过滤，如 is_test = 0；不放这里就会有人漏掉"
+        },
+        "non_additive_note": {"type": "string", "minLength": 6, "description": "additivity=non_additive 时必填：为什么不能二次汇总、正确做法是什么"},
+        "owner": {"type": "string", "minLength": 2},
+        "status": {"type": "string", "enum": ["draft", "active", "deprecated"]},
+        "replaced_by": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,63}$"},
+        "ontology_ref": {"type": "string", "pattern": "^ontology/.+\\.yaml$"}
+      }
+    }
+  }
+}

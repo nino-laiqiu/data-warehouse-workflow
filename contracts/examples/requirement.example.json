@@ -1,0 +1,38 @@
+{
+  "run_id": "P1-20261122-02",
+  "stage": "P1",
+  "payload": {
+    "requirement_id": "REQ-20261122-02",
+    "title": "电商用户画像标签（基础画像 + 购买行为画像）",
+    "source": {
+      "path": "requirements/画像标签需求20261122/反馈者/REQ-20261122-02.md",
+      "sha256": "510ca1ceca7723bef63cecb483f33b2a048a2d5a518c16561d46c2f55b8c5cdb",
+      "proposer": "nino",
+      "channel": "DSH会话-m01233",
+      "proposed_at": "2026-11-22"
+    },
+    "goal": "每天产出一张用户画像宽表，支持运营按基础属性与购买行为圈人",
+    "metrics": [
+      {"metric_id": "GMV", "name_cn": "成交额", "kind": "atomic", "additivity": "additive"},
+      {"metric_id": "ORDER_CNT", "name_cn": "订单数", "kind": "atomic", "additivity": "additive"},
+      {"metric_id": "AOV", "name_cn": "客单价", "kind": "derived", "additivity": "non_additive"}
+    ],
+    "tables_in": ["dim_user_df", "dwd_pay_flow_di", "dwd_order_main_di", "dim_product_df"],
+    "tables_out": ["dws_user_profile_df"],
+    "grain": "一用户一行，dt 分区为全量快照",
+    "boundaries": {
+      "include": ["基础画像 5 个标签", "购买行为画像 7 个标签"],
+      "exclude": ["人群包导出", "实时标签", "长表视图"]
+    },
+    "acceptance": [
+      {"id": "AC1", "statement": "每日分区行数等于当日 dim_user_df 去重用户数", "assertion": "row_count = COUNT(DISTINCT user_id) FROM dim_user_df WHERE dt = '${dt}'"},
+      {"id": "AC2", "statement": "13 个标签列不允许为 NULL", "assertion": "COUNT(*) WHERE 任一列为 NULL = 0"},
+      {"id": "AC3", "statement": "近30天 GMV 与支付流水汇总差异小于 0.0001", "assertion": "ABS(dws - dwd) / dwd < 0.0001"}
+    ],
+    "excluded": ["不做实时更新", "不导出人群包文件", "不提供长表视图（要就另开需求）"],
+    "open_questions": [
+      {"id": "Q1", "text": "城市等级取注册地还是收货地址（地址表尚未接入）", "blocking": false, "owner": "开发者1"}
+    ],
+    "status": "confirmed"
+  }
+}

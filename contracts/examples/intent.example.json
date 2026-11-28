@@ -1,0 +1,27 @@
+{
+  "run_id": "A-20261128-001",
+  "stage": "A1",
+  "payload": {
+    "question": "近30天各渠道的GMV是多少",
+    "user_role": "分析师",
+    "metrics": [
+      {"metric_id": "GMV", "name_cn": "成交额", "confidence": 0.95, "term_used_by_user": "GMV"}
+    ],
+    "dims": [
+      {"dim_id": "CHANNEL", "name_cn": "渠道", "source_table": "dim_channel_df"}
+    ],
+    "time_window": {
+      "mode": "relative",
+      "expr": "近30天",
+      "dt_field": "pay_time"
+    },
+    "filters": [
+      {"field": "is_test", "op": "=", "value": "0"}
+    ],
+    "ambiguities": [
+      {"id": "Q1", "text": "「GMV」是否含运费与退款回冲", "blocking": false, "resolution": "ontology", "note": "本体 GMV 已定：按 pay_time 归日、不含运费、退款不回冲"}
+    ],
+    "assumptions": ["近30天按 T-29 ~ T 的自然日，T 为分区日"],
+    "ontology_refs": ["ontology/metric/atomic/gmv.yaml", "ontology/dict/channel.yaml"]
+  }
+}

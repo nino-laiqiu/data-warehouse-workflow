@@ -1,0 +1,49 @@
+{
+  "run_id": "A-20261128-001",
+  "stage": "A5",
+  "payload": {
+    "intent_ref": "A-20261128-001",
+    "question": "近30天各渠道的GMV是多少",
+    "engine": "hive",
+    "sql": "SELECT d.channel_name,\n       SUM(p.pay_amt) AS gmv\nFROM dwd_pay_flow_di p\nJOIN dim_channel_df d ON d.channel_code = p.channel_code AND d.dt = '${dt}'\nWHERE p.dt BETWEEN date_sub('${dt}', 29) AND '${dt}'\n  AND p.is_test = 0\nGROUP BY d.channel_name\nORDER BY gmv DESC\nLIMIT 2000",
+    "sql_hash": "87e527e3ff829307ebab9d677646345d55eb8916ed8f7d97eb2647ca500827e4",
+    "columns": [
+      {
+        "name": "channel_name",
+        "type": "string",
+        "meaning": "渠道中文名"
+      },
+      {
+        "name": "gmv",
+        "type": "number",
+        "meaning": "渠道 GMV（元），按 pay_time 归日、不含运费、退款不回冲"
+      }
+    ],
+    "row_count": 4,
+    "caveats": [
+      "渠道取值来自 dim_channel_df 当日快照，历史渠道改名不会回溯",
+      "GMV 不含运费与退款回冲，与财务口径可能有差异"
+    ],
+    "conclusion": {
+      "text": "近30天四个渠道里 app 的 GMV 最高，约为第二名 mini_program 的 1.8 倍；该结论只描述这段时间的分布，不解释原因。",
+      "claims": [
+        {
+          "id": "C1",
+          "text": "app 渠道 GMV 在四个渠道中排第一",
+          "type": "observation",
+          "evidence": "结果第 1 行 channel_name=app"
+        },
+        {
+          "id": "C2",
+          "text": "app 的 GMV 约为 mini_program 的 1.8 倍",
+          "type": "comparison",
+          "evidence": "gmv 列第 1 行 / 第 2 行"
+        }
+      ],
+      "confidence": 0.8
+    },
+    "followups": [
+      "app 的 GMV 领先是否由客单价驱动？可拆成 GMV / 订单数 两个指标再看一次"
+    ]
+  }
+}

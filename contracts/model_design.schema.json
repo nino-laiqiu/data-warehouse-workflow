@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://data-warehouse-workflow/contracts/model_design",
+  "title": "模型设计契约（P2 双轨产出）",
+  "description": "一条轨道的产出一份。判据：粒度与主键能唯一确定一行；每个字段能指到来源列或明确写「派生」；分区字段不在列定义里重复。",
+  "type": "object",
+  "required": ["run_id", "stage", "payload"],
+  "properties": {
+    "run_id": {"type": "string", "minLength": 4},
+    "stage": {"type": "string", "enum": ["P2"]},
+    "payload": {
+      "type": "object",
+      "required": ["requirement_id", "track", "target_table", "grain", "partition", "keys", "columns", "sources", "ddl_ref"],
+      "additionalProperties": false,
+      "properties": {
+        "requirement_id": {"type": "string", "pattern": "^REQ-\\d{8}-\\d{2}$"},
+        "track": {"type": "string", "enum": ["a", "b"], "description": "双轨编号，禁止两轨共用同一个 run_id"},
+        "target_table": {"type": "string", "pattern": "^(ods|dwd|dws|ads|dim)_[a-z0-9_]+$"},
+        "grain": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 2}},
+        "partition": {
+          "type": "object",
+          "required": ["field", "type", "granularity"],
+          "additionalProperties": false,
+          "properties": {
+            "field": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+            "type": {"type": "string", "enum": ["string", "int"]},
+            "granularity": {"type": "string", "enum": ["day", "hour", "month"]},
+            "retention_days": {"type": "integer", "minimum": 1}
+          }
+        },
+        "keys": {
+          "type": "array", "minItems": 1,
+          "items": {"type": "object", "required": ["field"], "additionalProperties": false,
+            "properties": {"field": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"}, "role": {"type": "string", "enum": ["pk", "fk", "dedup"]}}}
+        },
+        "columns": {
+          "type": "array", "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["name", "type", "comment", "source"],
+            "additionalProperties": false,
+            "properties": {
+              "name": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+              "type": {"type": "string", "enum": ["string", "bigint", "int", "double", "decimal(18,2)", "decimal(18,4)", "timestamp", "date"]},
+              "comment": {"type": "string", "minLength": 2, "description": "中文口径；UNKNOWN/未购 这类特殊值必须在此说明"},
+              "source": {"type": "string", "minLength": 2, "description": "来源列（table.col）或派生说明（derived: ...）"},
+              "nullable": {"type": "boolean"}
+            }
+          }
+        },
+        "sources": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^(ods|dwd|dws|ads|dim)_[a-z0-9_]+$"}},
+        "ddl_ref": {"type": "string", "pattern": "\\.sql$", "description": "相对需求目录的 DDL 路径"},
+        "etl_ref": {"type": "string", "pattern": "\\.sql$"},
+        "row_estimate": {"type": "integer", "minimum": 0},
+        "tradeoffs": {"type": "array", "items": {"type": "string", "minLength": 6}, "description": "本轨道做了什么取舍、代价是什么"}
+      }
+    }
+  }
+}

@@ -433,7 +433,7 @@ def render_md(r: dict) -> str:
         "", "## 三、资产",
         "",
         f"- **本体**：{o['files']} 个文件（{status}）",
-        f"- **契约**：{len(r['contracts']['have'])}/{r['contracts']['designed']}（缺：{'、'.join(r['contracts']['missing']) or '无'}）",
+        f"- **契约**：设计契约 {len([c for c in r['contracts']['have'] if c in DESIGNED_CONTRACTS])}/{r['contracts']['designed']}（缺：{'、'.join(r['contracts']['missing']) or '无'}），另有 {len([c for c in r['contracts']['have'] if c not in DESIGNED_CONTRACTS])} 个附加契约（留痕/验证/问答/模板）",
         f"- **技能**：已实现 {len(r['skills']['implemented'])}，被引用 {len(r['skills']['referenced'])}，待建 {len(r['skills']['pending'])}",
         f"- **知识**：{k['files']} 个文件，索引 {k['chunks']} 条，未索引 {len(k['uncovered'])} 个",
         "",
