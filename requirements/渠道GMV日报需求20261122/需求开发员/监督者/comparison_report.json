@@ -1,0 +1,118 @@
+{
+  "run_id": "20261122-01",
+  "stage": "P3",
+  "payload": {
+    "requirement_id": "REQ-20261122-01",
+    "differences": [
+      {
+        "id": "S1",
+        "aspect": "structure",
+        "track_a": "维表侧先聚合到 channel_code 唯一：SELECT channel_code, MAX(channel_name) FROM dim_channel_df WHERE dt='${dt}' GROUP BY channel_code，再 LEFT JOIN 事实聚合结果（A ETL L62-69）。",
+        "track_b": "维表侧不聚合：SELECT channel_code, channel_name FROM dim_channel_df WHERE dt='${dt}'，直接 LEFT JOIN（B ETL L66-70）；同一 channel_code 在维表有多行时会把事实行放大。",
+        "basis": "REQ §6.3 要求同 dt+channel_code 只有一行；knowledge/wiki/04-维表.md:59-64 明确维表主键是 channel_id 而不是 channel_code，按 channel_code 关联不能假定唯一；A self-check §3.3 把维表 JOIN 放大列为唯一键失败首因。",
+        "decision": "a",
+        "note": "直接服务于唯一键验收，不是可选优化；B 依赖未经证实的 channel_code 唯一性。"
+      },
+      {
+        "id": "D1",
+        "aspect": "implementation",
+        "track_a": "未识别渠道兜底为 'other'：COALESCE(channel_code,'other')（A ETL L43），DDL 注释写“缺失归 other，非空非字典值保留原码”（A DDL L21）。",
+        "track_b": "未识别渠道兜底为 'unknown'：COALESCE(NULLIF(TRIM(f.channel_code),''),'unknown')（B ETL L30、L62），DDL 注释写“未识别渠道落 unknown”（B DDL L19）。",
+        "basis": "knowledge/wiki/03-事实表.md:125「未识别渠道归 other，不要丢行，否则总数对不上」；ontology/dict/channel.yaml 的 CHANNEL 值域只有 app/mini_program/h5/pc，other/unknown 都不在字典内。",
+        "decision": "a",
+        "note": "两轨对“未识别渠道保留并汇总”没有分歧，只是桶名不同；B 的 unknown 偏离仓库惯例，不构成需要退回 P1 的口径变更。CHANNEL 缺 other 是本体缺口，列入 H2-4。"
+      },
+      {
+        "id": "D2",
+        "aspect": "implementation",
+        "track_a": "维表未匹配时 channel_name 兜底为 '未识别'：COALESCE(c.channel_name,'未识别')（A ETL L21）。",
+        "track_b": "维表未匹配时 channel_name 兜底为 channel_code：COALESCE(d.channel_name,p.channel_code)（B ETL L21）。",
+        "basis": "REQ §4 只要求输出 channel_name，未规定兜底值；knowledge/wiki/03-事实表.md:125 的 other 约定只针对渠道码。A 的 '未识别' 把维表缺行显式暴露，channel_code 列仍保留原码；B 把码复制进名称列会掩盖维表缺口。",
+        "decision": "a",
+        "note": "'未识别' 只出现在 channel_name，不受 CHANNEL 码值域约束；若 H2 倾向代码兜底，只改一行。"
+      },
+      {
+        "id": "D3",
+        "aspect": "implementation",
+        "track_a": "只处理 NULL：COALESCE(channel_code,'other')；空串 '' 与纯空白会原样进入结果。A self-check §3.1 用 channel_code='' 断言 empty_cnt=0，但 SQL 本身不能保证。",
+        "track_b": "用 NULLIF(TRIM(channel_code),'') 同时处理 NULL、空串、前后空白；但 test 过滤仍比较原始值，' test ' 先通过过滤、再在聚合处被 TRIM 成 'test'，测试渠道会漏进结果（B self-check §4.3 自认）。",
+        "basis": "REQ §6.1 要求 channel_code 无空值；A self-check §3.1 的 empty_cnt 断言需要 SQL 真正保证；B self-check §4.3 暴露了 TRIM 与 test 过滤不同源的新缺口。",
+        "decision": "merge",
+        "note": "采用 B 的 NULLIF(TRIM(...),'') 归一，保留 A 的 'other'；并把同一表达式用于 test 过滤，保证 ' test ' 也被排除。final 改动见 C3/C4。"
+      },
+      {
+        "id": "D4",
+        "aspect": "implementation",
+        "track_a": "严格按声明主键去重：ROW_NUMBER() OVER (PARTITION BY order_id, pay_seq ...)（A ETL L45）。",
+        "track_b": "pay_seq 为空时退化到 pay_id：PARTITION BY order_id, COALESCE(pay_seq, pay_id)（B ETL L46）。",
+        "basis": "knowledge/wiki/03-事实表.md:65 主键 order_id+pay_seq；:73「必须按 (order_id, pay_seq) 去重」；knowledge/wiki/05-取数路径.md:33 同。没有证据表明 pay_id 可以替代：重复回调若共享 pay_id，退化仍不能去重；若各自生成新 pay_id，退化会把重复回调留下。",
+        "decision": "a",
+        "note": "同一主键下的 NULL 降级路径，不是两套去重口径；pay_seq 可空性交 P4/上游确认，不在脚本里猜。"
+      },
+      {
+        "id": "D5",
+        "aspect": "implementation",
+        "track_a": "去重并列键用金额：ORDER BY pay_time DESC, pay_amt DESC（A ETL L46）。",
+        "track_b": "去重并列键用 pay_id：ORDER BY pay_time DESC, pay_id DESC，理由“金额以最后到达的回调为准”（B ETL L47）。",
+        "basis": "knowledge/wiki/03-事实表.md:73 说重复回调是“同一笔流水落多条”，正常情况各列相同，并列键只影响脏数据；A 的键只用已选列、是确定的全序，且不引入“pay_id 越大越晚到”的未证实假设；pay_id 在同一笔流水的重复行上可能相同，无法保证全序。",
+        "decision": "a",
+        "note": "若出现金额不一致的重复回调，A 会取较大金额，可能高估；这是数据质量异常，列入遗留风险，不用未经验证的排序假设掩盖。"
+      },
+      {
+        "id": "D6",
+        "aspect": "implementation",
+        "track_a": "只靠 dt='${dt}' 过滤，信任分区按 pay_time 归日的契约（A ETL L49）。",
+        "track_b": "在 dt 之外再加 TO_DATE(f0.pay_time)=TO_DATE('${dt}')（B ETL L54）。",
+        "basis": "knowledge/wiki/03-事实表.md:66 分区 dt 就是按 pay_time 归日；REQ §2/§5 的归日字段是 pay_time。B self-check 夹具 P08 显示这层过滤会把“分区错标”的行静默丢掉（少算 GMV），而 A 的做法会让偏差在 REQ §6.2 的 ADS 对账暴露；TO_DATE 对 TIMESTAMP 的时区/类型行为 B 也未在真引擎验证（B self-check §4.1）。",
+        "decision": "a",
+        "note": "上游错标应由 DQ 暴露，不静默丢行；若怀疑分区错标，加“dt 与 TO_DATE(pay_time) 一致性”检查，而不是在 ETL 里过滤。"
+      },
+      {
+        "id": "D7",
+        "aspect": "implementation",
+        "track_a": "aov 存储精度 DECIMAL(18,2)，ETL CAST(... AS DECIMAL(18,2))（A DDL L25、A ETL L25）。",
+        "track_b": "aov 存储精度 DECIMAL(18,4)，ETL CAST(... AS DECIMAL(18,4))（B DDL L23、B ETL L24）。",
+        "basis": "ontology/metric/derived/aov.yaml id AOV：派生比率、non_additive；2 位小数在存储时就舍入，4 位只多占极少空间、下游展示仍可再舍。knowledge/wiki/01-命名与词根.md:53 的 DECIMAL(18,2) 规则针对 _amt 金额字段，aov 不是 _amt；AOV 的正确用法是 SUM(gmv)/SUM(order_cnt) 重算，精度不改变不可加性。",
+        "decision": "b",
+        "note": "只改存储与 CAST 精度，不改除法逻辑；下游仍禁止 AVG(aov)。"
+      }
+    ],
+    "verdict": "采用 A 轨（developer-1）为主体，吸收 B 轨的渠道码空值/空白归一与 AOV 18,4 两项实现改进；A 轨在未识别渠道惯例（other）、维表先聚合防扇出、严格按 (order_id,pay_seq) 去重三处更贴近知识库，两轨在 GMV/ORDER_CNT/AOV/CHANNEL 口径上无实质分歧，不退回 P1。",
+    "final_files": [
+      "requirements/渠道GMV日报需求20261122/需求开发员/监督者/final/01_dws_trade_channel_1d.sql",
+      "requirements/渠道GMV日报需求20261122/需求开发员/监督者/final/02_etl_dws_trade_channel_1d.sql"
+    ],
+    "changes": [
+      {
+        "path": "requirements/渠道GMV日报需求20261122/需求开发员/监督者/final/01_dws_trade_channel_1d.sql",
+        "reason": "aov 由 DECIMAL(18,2) 改为 DECIMAL(18,4)，与 B 轨一致、与 ETL 的 CAST 精度对齐（D7）。",
+        "from": "b"
+      },
+      {
+        "path": "requirements/渠道GMV日报需求20261122/需求开发员/监督者/final/01_dws_trade_channel_1d.sql",
+        "reason": "channel_code 注释由“缺失归 other”改为“缺失或空白归 other”，同步 D3 的空值/空白归一规则。",
+        "from": "merge"
+      },
+      {
+        "path": "requirements/渠道GMV日报需求20261122/需求开发员/监督者/final/02_etl_dws_trade_channel_1d.sql",
+        "reason": "渠道码由 COALESCE(channel_code,'other') 改为 COALESCE(NULLIF(TRIM(channel_code),''),'other')，处理 NULL/空串/前后空白，保留 A 的 other 兜底（D3）。",
+        "from": "merge"
+      },
+      {
+        "path": "requirements/渠道GMV日报需求20261122/需求开发员/监督者/final/02_etl_dws_trade_channel_1d.sql",
+        "reason": "test 过滤由 COALESCE(channel_code,'') <> 'test' 改为与 SELECT 同一套归一化表达式，避免 ' test ' 先通过过滤再被 TRIM 成 'test' 而漏滤（D3）。",
+        "from": "merge"
+      },
+      {
+        "path": "requirements/渠道GMV日报需求20261122/需求开发员/监督者/final/02_etl_dws_trade_channel_1d.sql",
+        "reason": "aov 的 CAST 由 DECIMAL(18,2) 改为 DECIMAL(18,4)，与 DDL 和目标精度对齐（D7）。",
+        "from": "b"
+      },
+      {
+        "path": "requirements/渠道GMV日报需求20261122/需求开发员/监督者/final/02_etl_dws_trade_channel_1d.sql",
+        "reason": "同步渠道归一化与 test 过滤相关注释，避免注释仍描述旧行为（D3）。",
+        "from": "merge"
+      }
+    ]
+  }
+}

@@ -153,7 +153,8 @@ python tools/chat.py serve --port 8765                     # 同契约的本地 
 十五个校验器（另有问答沉淀与候选转正两条链路） + 需求雷达 + 调度执行器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
 
 推送通道的原理、失败排查表、新窗口冷启动清单，见 [`docs/推送流程.md`](docs/推送流程.md)。
-角色怎么被 subagent 真跑，见 [`docs/角色运行.md`](docs/角色运行.md)；定时怎么接，见 [`docs/调度.md`](docs/调度.md)；
+角色怎么被 subagent 真跑，见 [`docs/角色运行.md`](docs/角色运行.md)；
+第二遍双轨（渠道 GMV 日报）用 subagent 真跑后的复盘——隔离/门禁/手工过门三个问题的实测结论，见 [`docs/复盘-第二遍双轨.md`](docs/复盘-第二遍双轨.md)；定时怎么接，见 [`docs/调度.md`](docs/调度.md)；
 外部系统（含其他问答系统）怎么把分析师问答送进来，见 [`docs/问答采集接口.md`](docs/问答采集接口.md)；
 人怎么进入这套工作流（取数问答 / 口径澄清 / 派活），见 [`docs/对话界面.md`](docs/对话界面.md)；
 14 个技能的判据与排期，见 [`docs/技能清单.md`](docs/技能清单.md)。
@@ -174,6 +175,7 @@ python tools/chat.py serve --port 8765                     # 同契约的本地 
 | M2b B 线 Skills | `skills/sk-req-*` `sk-sql-*` `sk-ont-validate` | 部分（已实现 sk-req-register / sk-req-validate / sk-sql-ddl） |
 | M3 契约落地 | `contracts/` 9 个 schema | 部分（模板 + 5 个：comparison_report / journal_entry / dq_rules / lineage / ontology_delta） |
 | M4 电商域闭环 | `requirements/画像标签需求20261122/需求开发员/` | ✅ P0–P6 全跑通（REQ-20261122-02，H3 待人工放行） |
+| M4b 第二遍双轨 | `requirements/渠道GMV日报需求20261122/需求开发员/` | 🟡 P0–P3 跑通（subagent 真跑，H2 待裁决；G3 因 sk-sql-guard 无实现而挂起） |
 | M5 巡检器 | `tools/inspect.py` 一条命令出门禁矩阵 + 周报 | ✅ 12 项门禁，首份周报 `runs/inspection/2026-W48/` |
 | M5b 运行载体 | 角色 → subagent 提示词（`agents/roles.json` + `tools/role_prompt.py`） | ✅ |
 | M5c 调度载体 | `flow/schedule.yaml` + `tools/run_schedule.py`（cron / 任务计划程序 / DSH 定时都调它） | ✅ |

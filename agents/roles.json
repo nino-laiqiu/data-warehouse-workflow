@@ -47,7 +47,7 @@
         "knowledge/wiki/**"
       ],
       "outputs": [
-        "<需求目录>/需求分析员/REQ-*-translation.md",
+        "<需求目录>/需求分析员/REQ-*.md",
         "<run>/本体变更/ontology_delta.json",
         "<run>/质量/dq_rules.json"
       ],
@@ -77,8 +77,7 @@
         "<run>/developer-2/**"
       ],
       "inputs": [
-        "<需求目录>/需求分析员/REQ-*-translation.md",
-        "<run>/监督者/final/*.sql",
+        "<需求目录>/需求分析员/REQ-*.md",
         "ontology/**",
         "knowledge/wiki/**"
       ],
@@ -89,7 +88,7 @@
         "<run>/血缘/lineage.json",
         "<run>/血缘/dag_*.py"
       ],
-      "notes": "P2 双轨之一，与 developer-2 并行且互不可见（看得见就会趋同，比对失去信息量）。P3 裁决后隔离解除，由它落地血缘与调度（P5/G5）——同一个实现者接手自己的最终脚本，比第三人重新读一遍更省事。"
+      "notes": "P2 双轨之一，与 developer-2 并行且互不可见（看得见就会趋同，比对失去信息量）。P3 裁决后隔离解除，由它落地血缘与调度（P5/G5）——同一个实现者接手自己的最终脚本，比第三人重新读一遍更省事。 P2 只读需求稿与本体/知识；P5 才读 监督者/final/*.sql 接手落地。"
     },
     {
       "id": "developer-2",
@@ -113,7 +112,7 @@
         "<run>/developer-1/**"
       ],
       "inputs": [
-        "<需求目录>/需求分析员/REQ-*-translation.md",
+        "<需求目录>/需求分析员/REQ-*.md",
         "ontology/**",
         "knowledge/wiki/**"
       ],
@@ -146,7 +145,7 @@
       "inputs": [
         "<run>/developer-1/**",
         "<run>/developer-2/**",
-        "<需求目录>/需求分析员/REQ-*-translation.md",
+        "<需求目录>/需求分析员/REQ-*.md",
         "ontology/**"
       ],
       "outputs": [
@@ -179,7 +178,7 @@
       "must_not_read": [],
       "inputs": [
         "<run>/**",
-        "<需求目录>/需求分析员/REQ-*-translation.md"
+        "<需求目录>/需求分析员/REQ-*.md"
       ],
       "outputs": [
         "<run>/journal.jsonl",

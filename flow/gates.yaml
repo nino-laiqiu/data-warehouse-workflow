@@ -34,11 +34,16 @@ lane_b:
   - id: G2
     name: 双轨独立完成
     type: auto
+    check: python tools/check_dual_track.py --req <需求目录>
     checks:
       - 两轨都有 sql/、design-notes.md、self-check.md，缺一即失败
       - 两轨 SQL 的 sha256 不相同（相同 = 抄袭或串通，双轨失去意义）
       - journal 中无跨轨读取事件（developer-1 读 track-2 或反之）
       - design-notes 里标记 needs-confirmation 的假设，不得同时出现在已完成产出中
+    known_gap:
+      - 「journal 无跨轨读取事件」目前无法机械验证：没有代码记录「谁读了哪个路径」，
+        隔离仍是声明式的（roles.json 的 must_not_read）；check_dual_track.py 只能查
+        产物里的跨轨标识作为间接物证
     on_fail: 作废该轮双轨，重跑 P2，并记录违规
 
   - id: G3

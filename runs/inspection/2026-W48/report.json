@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-11-28T10:40:27+08:00",
+  "generated_at": "2026-11-28T11:35:52+08:00",
   "week": "2026-W48",
   "summary": {
-    "checks_total": 14,
-    "checks_passed": 14,
-    "score": 87,
+    "checks_total": 18,
+    "checks_passed": 18,
+    "score": 83,
     "block": 0
   },
   "checks": [
@@ -92,6 +92,44 @@
       "reason": ""
     },
     {
+      "name": "对比报告 渠道GMV日报需求20261122",
+      "group": "门禁",
+      "cmd": [
+        "./tools/validate_contracts.py",
+        "requirements/渠道GMV日报需求20261122/需求开发员/监督者/comparison_report.json"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
+      "name": "留痕格式 渠道GMV日报需求20261122",
+      "group": "门禁",
+      "cmd": [
+        "./tools/validate_contracts.py",
+        "requirements/渠道GMV日报需求20261122/需求开发员/journal.jsonl",
+        "--lines",
+        "--schema",
+        "contracts/journal_entry.schema.json"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
+      "name": "留痕完整性 渠道GMV日报需求20261122",
+      "group": "门禁",
+      "cmd": [
+        "./tools/journal.py",
+        "check",
+        "--req",
+        "渠道GMV日报需求20261122"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
       "name": "翻译稿 G1 画像标签需求20261122",
       "group": "门禁",
       "cmd": [
@@ -151,6 +189,19 @@
       "reason": ""
     },
     {
+      "name": "审阅状态 REQ-20261122-02",
+      "group": "门禁",
+      "cmd": [
+        "./tools/req_review.py",
+        "check",
+        "--req-id",
+        "REQ-20261122-02"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
       "name": "留痕完整性 画像标签需求20261122",
       "group": "门禁",
       "cmd": [
@@ -177,6 +228,20 @@
       "sk-req-validate",
       "sk-sql-ddl"
     ],
+    "spec_only": [
+      "sk-doc-assemble",
+      "sk-dq-gen",
+      "sk-lin-build",
+      "sk-ont-validate",
+      "sk-qry-check",
+      "sk-qry-gen",
+      "sk-qry-intent",
+      "sk-qry-locate",
+      "sk-spec-align",
+      "sk-sql-diff",
+      "sk-sql-dml",
+      "sk-sql-guard"
+    ],
     "referenced": [
       "sk-doc-assemble",
       "sk-dq-gen",
@@ -193,19 +258,7 @@
       "sk-sql-dml",
       "sk-sql-guard"
     ],
-    "pending": [
-      "sk-ont-validate",
-      "sk-sql-dml",
-      "sk-sql-guard",
-      "sk-sql-diff",
-      "sk-dq-gen",
-      "sk-lin-build",
-      "sk-doc-assemble",
-      "sk-qry-intent",
-      "sk-qry-locate",
-      "sk-qry-gen",
-      "sk-qry-check"
-    ],
+    "pending": [],
     "orphan": []
   },
   "contracts": {
@@ -214,7 +267,10 @@
       "dq_rules",
       "journal_entry",
       "lineage",
-      "ontology_delta"
+      "ontology_delta",
+      "qa_ingest_request",
+      "qa_record",
+      "verification_report"
     ],
     "missing": [
       "intent",
@@ -226,8 +282,8 @@
     "designed": 9
   },
   "knowledge": {
-    "files": 8,
-    "chunks": 8,
+    "files": 9,
+    "chunks": 9,
     "uncovered": [
       "knowledge/index.md"
     ]
@@ -235,10 +291,37 @@
   "journals": {
     "requirements": [
       {
-        "requirement": "画像标签需求20261122",
-        "events": 50,
+        "requirement": "渠道GMV日报需求20261122",
+        "events": 10,
         "open_todos": [
-          "T-20261128-01"
+          "T-20261128-05",
+          "T-20261128-06"
+        ],
+        "blocked_days": 0,
+        "gates": {
+          "G2": "pass",
+          "G0": "pass",
+          "G1": "pass"
+        },
+        "reached": "G2",
+        "passed_count": 3,
+        "waiting": [
+          "G3",
+          "G4",
+          "G5",
+          "G6"
+        ],
+        "anomalies": [],
+        "waived": [],
+        "last_ts": "2026-11-28T11:35:51+08:00"
+      },
+      {
+        "requirement": "画像标签需求20261122",
+        "events": 68,
+        "open_todos": [
+          "T-20261128-02",
+          "T-20261128-03",
+          "T-20261128-04"
         ],
         "blocked_days": 0,
         "gates": {
@@ -248,40 +331,53 @@
           "G3": "pass",
           "SK-SQL-GUARD": "waived",
           "G4": "pass",
-          "G6": "pass"
+          "G6": "pass",
+          "G5": "waived"
         },
         "reached": "G6",
-        "passed_count": 6,
-        "waiting": [
+        "passed_count": 7,
+        "waiting": [],
+        "anomalies": [],
+        "waived": [
           "G5"
         ],
-        "anomalies": [
-          "G5 未过但 G6 已过（门禁顺序倒挂）"
-        ],
-        "last_ts": "2026-11-28T10:37:24+08:00"
+        "last_ts": "2026-11-28T11:15:27+08:00"
       }
     ]
   },
   "hygiene": {
-    "empty_dirs": [
-      "requirements/渠道GMV日报需求20261122/需求开发员"
-    ]
+    "empty_dirs": []
   },
   "problems": [
     {
-      "level": "anomaly",
-      "where": "画像标签需求20261122",
-      "detail": "G5 未过但 G6 已过（门禁顺序倒挂）"
+      "level": "hitl",
+      "where": "渠道GMV日报需求20261122 · G3",
+      "detail": "未过门，需 H2 裁决评审（已挂 0 天）"
+    },
+    {
+      "level": "gap",
+      "where": "渠道GMV日报需求20261122 · G4",
+      "detail": "未过门（已挂 0 天）"
     },
     {
       "level": "hitl",
-      "where": "画像标签需求20261122 · G5",
+      "where": "渠道GMV日报需求20261122 · G5",
       "detail": "未过门，需 H3 上线放行（已挂 0 天）"
     },
     {
       "level": "gap",
+      "where": "渠道GMV日报需求20261122 · G6",
+      "detail": "未过门（已挂 0 天）"
+    },
+    {
+      "level": "stale",
+      "where": "画像标签需求20261122 · G5",
+      "detail": "有条件放行（waived）：到期前必须补现网证据，否则视为未放行"
+    },
+    {
+      "level": "info",
       "where": "技能",
-      "detail": "11 个技能被工作流引用但未实现: sk-ont-validate, sk-sql-dml, sk-sql-guard, sk-sql-diff, sk-dq-gen, sk-lin-build, sk-doc-assemble, sk-qry-intent, sk-qry-locate, sk-qry-gen, sk-qry-check"
+      "detail": "12 个技能只有规格（status: spec），实现待排期: sk-doc-assemble, sk-dq-gen, sk-lin-build, sk-ont-validate, sk-qry-check, sk-qry-gen, sk-qry-intent, sk-qry-locate, sk-spec-align, sk-sql-diff, sk-sql-dml, sk-sql-guard"
     },
     {
       "level": "gap",
@@ -294,15 +390,20 @@
       "detail": "1 个知识文件没有 chunk 索引"
     },
     {
-      "level": "info",
-      "where": "空目录",
-      "detail": "requirements/渠道GMV日报需求20261122/需求开发员"
+      "level": "gap",
+      "where": "知识候选",
+      "detail": "3 条候选待审（最老一条 0 天）：C-20261128-02, C-20261128-03, C-20261128-04"
     }
   ],
   "hitl_backlog": [
     {
       "level": "hitl",
-      "where": "画像标签需求20261122 · G5",
+      "where": "渠道GMV日报需求20261122 · G3",
+      "detail": "未过门，需 H2 裁决评审（已挂 0 天）"
+    },
+    {
+      "level": "hitl",
+      "where": "渠道GMV日报需求20261122 · G5",
       "detail": "未过门，需 H3 上线放行（已挂 0 天）"
     }
   ],
