@@ -1,122 +1,138 @@
 {
   "requirement_id": "REQ-20261122-02",
   "doc": "requirements/画像标签需求20261122/需求分析员/REQ-20261122-02.md",
-  "status": "review",
-  "round": 0,
+  "status": "confirmed",
+  "round": 1,
   "questions": [
     {
       "id": "Q1",
       "text": "是否复购：终身付过款 vs 仅近30天？现稿按终身",
       "blocking": true,
-      "answer": "",
-      "answered_by": "",
-      "answered_at": "",
+      "answer": "终身：历史上有过任一支付成功订单即算「是」；只看 30 天会把复购率压到很低",
+      "answered_by": "需求分析员（代定·测试数据）",
+      "answered_at": "2026-11-28T10:51:52+08:00",
       "asked_at": "2026-11-28T10:42:51+08:00"
     },
     {
       "id": "Q2",
       "text": "客单价档位分桶边界，及边界值归属",
       "blocking": true,
-      "answer": "",
-      "answered_by": "",
-      "answered_at": "",
+      "answer": "<50 / 50-100 / 100-300 / 300-1000 / 1000+，左闭右开（正好 100 落在 100-300）",
+      "answered_by": "需求分析员（代定·测试数据）",
+      "answered_at": "2026-11-28T10:51:52+08:00",
       "asked_at": "2026-11-28T10:42:51+08:00"
     },
     {
       "id": "Q3",
       "text": "年龄段分桶边界与生日当天归属",
       "blocking": true,
-      "answer": "",
-      "answered_by": "",
-      "answered_at": "",
+      "answer": "<18 / 18-24 / 25-34 / 35-44 / 45+，按周岁、生日当天进新档",
+      "answered_by": "需求分析员（代定·测试数据）",
+      "answered_at": "2026-11-28T10:51:52+08:00",
       "asked_at": "2026-11-28T10:42:52+08:00"
     },
     {
       "id": "Q4",
       "text": "性别缺失落未知，还是按品类推断？建议未知",
       "blocking": true,
-      "answer": "",
-      "answered_by": "",
-      "answered_at": "",
+      "answer": "落「未知」，不按品类推断——推断会把错误放大且无法回滚",
+      "answered_by": "需求分析员（代定·测试数据）",
+      "answered_at": "2026-11-28T10:51:52+08:00",
       "asked_at": "2026-11-28T10:42:52+08:00"
     },
     {
       "id": "Q5",
       "text": "偏好品类口径：近30天金额Top1；并列如何取舍",
       "blocking": true,
-      "answer": "",
-      "answered_by": "",
-      "answered_at": "",
+      "answer": "近 30 天支付金额 Top1；并列取 category_id_l1 最小（可复现，不依赖查询顺序）",
+      "answered_by": "需求分析员（代定·测试数据）",
+      "answered_at": "2026-11-28T10:51:52+08:00",
       "asked_at": "2026-11-28T10:42:52+08:00"
     },
     {
       "id": "Q6",
       "text": "城市等级取最近收货地址还是注册城市？",
       "blocking": true,
-      "answer": "",
-      "answered_by": "",
-      "answered_at": "",
+      "answer": "取最近一次收货地址所在城市；无收货地址回退注册地；两者都缺 → 未知（测试期口径，正式上线前由需求方复核）",
+      "answered_by": "需求分析员（代定·测试数据）",
+      "answered_at": "2026-11-28T10:51:52+08:00",
       "asked_at": "2026-11-28T10:42:52+08:00"
     },
     {
       "id": "Q8",
       "text": "输出形态：每日全量快照 还是 变更增量？",
       "blocking": true,
-      "answer": "",
-      "answered_by": "",
-      "answered_at": "",
+      "answer": "每日全量快照（一圈人多标签 AND，宽表只扫一次）",
+      "answered_by": "需求分析员（代定·测试数据）",
+      "answered_at": "2026-11-28T10:51:52+08:00",
       "asked_at": "2026-11-28T10:42:52+08:00"
     },
     {
       "id": "Q9",
       "text": "首单距今天数分桶边界",
       "blocking": true,
-      "answer": "",
-      "answered_by": "",
-      "answered_at": "",
+      "answer": "0-7 / 8-30 / 31-90 / 90+；未购用户写「未购」",
+      "answered_by": "需求分析员（代定·测试数据）",
+      "answered_at": "2026-11-28T10:51:52+08:00",
       "asked_at": "2026-11-28T10:42:52+08:00"
     },
     {
       "id": "Q11",
       "text": "是否需要长表视图 v_user_profile_tag 供按标签名圈人",
       "blocking": true,
-      "answer": "",
-      "answered_by": "",
-      "answered_at": "",
+      "answer": "先不做长表视图；确有需求走 B 线新开一个需求，别在宽表需求里塞",
+      "answered_by": "需求分析员（代定·测试数据）",
+      "answered_at": "2026-11-28T10:51:52+08:00",
       "asked_at": "2026-11-28T10:42:52+08:00"
     },
     {
       "id": "Q7",
       "text": "时区是否全按北京时间自然日切",
       "blocking": false,
-      "answer": "",
-      "answered_by": "",
-      "answered_at": "",
+      "answer": "全按北京时间自然日切；海外流量当前为 0，暂不单独处理",
+      "answered_by": "需求分析员（代定·测试数据）",
+      "answered_at": "2026-11-28T10:51:52+08:00",
       "asked_at": "2026-11-28T10:42:52+08:00"
     },
     {
       "id": "Q10",
       "text": "测试账号过滤规则（is_test 还是 user_id 前缀）",
       "blocking": false,
-      "answer": "",
-      "answered_by": "",
-      "answered_at": "",
+      "answer": "只按 is_test = 0，不加前缀规则（多一条规则就多一处漂移）",
+      "answered_by": "需求分析员（代定·测试数据）",
+      "answered_at": "2026-11-28T10:51:52+08:00",
       "asked_at": "2026-11-28T10:42:52+08:00"
     },
     {
       "id": "Q12",
       "text": "首次上线是否回刷历史90天",
       "blocking": false,
-      "answer": "",
-      "answered_by": "",
-      "answered_at": "",
+      "answer": "首次上线回刷 90 天，之后只跑 T+1",
+      "answered_by": "需求分析员（代定·测试数据）",
+      "answered_at": "2026-11-28T10:51:52+08:00",
       "asked_at": "2026-11-28T10:42:53+08:00"
     }
   ],
-  "rounds": [],
+  "rounds": [
+    {
+      "no": 1,
+      "at": "2026-11-28T10:51:52+08:00",
+      "by": "nino",
+      "note": "第 1 轮：12 条按测试数据口径代定，答案并入第 2 段，第 8 段改为定稿留档",
+      "open_blocking": []
+    }
+  ],
   "created": "2026-11-28T10:42:29+08:00",
-  "updated": "2026-11-28T10:42:53+08:00",
+  "updated": "2026-11-28T10:52:00+08:00",
   "base_confirmed": true,
   "base_note": "v1 稿被 P2–P6 实际使用（REQ-20261122-02 已跑到 P6），作为基线；但人从未逐条确认，本轮 v2 就是对它的复核。",
-  "draft": "requirements/画像标签需求20261122/需求分析员/_draft/REQ-20261122-02.md"
+  "draft": "requirements/画像标签需求20261122/需求分析员/_draft/REQ-20261122-02.md",
+  "history": [
+    {
+      "at": "2026-11-28T10:52:00+08:00",
+      "event": "promote",
+      "note": "requirements/画像标签需求20261122/需求分析员/_draft/REQ-20261122-02.md"
+    }
+  ],
+  "confirmed_at": "2026-11-28T10:52:00+08:00"
 }

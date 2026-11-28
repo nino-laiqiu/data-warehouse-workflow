@@ -175,6 +175,13 @@ def cmd_promote(a: dict) -> int:
     if not draft.exists():
         print(f"没有草案: {rel(draft)}", file=sys.stderr)
         return 1
+    if target.exists():
+        hist = d / "需求分析员" / "_history"
+        hist.mkdir(parents=True, exist_ok=True)
+        n = len(list(hist.glob(f"{req_id}-v*.md"))) + 1
+        backup = hist / f"{req_id}-v{n}.md"
+        backup.write_text(target.read_text(encoding="utf-8"), encoding="utf-8")
+        print(f"旧稿已留档: {rel(backup)}")
     target.write_text(draft.read_text(encoding="utf-8"), encoding="utf-8")
     st["doc"] = rel(target)
     st.setdefault("history", []).append({"at": now(), "event": "promote", "note": rel(draft)})

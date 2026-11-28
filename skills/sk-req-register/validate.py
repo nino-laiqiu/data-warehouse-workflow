@@ -51,8 +51,8 @@ def main(argv: list[str]) -> int:
 
     files = []
     for p in sorted(inbox.rglob("REQ-*.md")):
-        if "_draft" in p.parts or "_review" in p.parts:
-            continue  # 翻译稿草案不是原始需求
+        if any(part.startswith("_") for part in p.parts):
+            continue  # 草案/审阅/留档都不是原始需求
         if not p.is_file():
             continue
         rel = p.resolve().relative_to(root.resolve()).as_posix()
