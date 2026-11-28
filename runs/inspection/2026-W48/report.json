@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-28T10:19:39+08:00",
+  "generated_at": "2026-11-28T10:25:50+08:00",
   "week": "2026-W48",
   "summary": {
     "checks_total": 11,
@@ -179,13 +179,13 @@
       "comparison_report",
       "dq_rules",
       "journal_entry",
-      "lineage"
+      "lineage",
+      "ontology_delta"
     ],
     "missing": [
       "intent",
       "analysis",
       "requirement",
-      "ontology_delta",
       "model_design",
       "metric_spec"
     ],
@@ -246,7 +246,7 @@
     {
       "level": "gap",
       "where": "契约",
-      "detail": "缺 6 个设计契约: intent, analysis, requirement, ontology_delta, model_design, metric_spec"
+      "detail": "缺 5 个设计契约: intent, analysis, requirement, model_design, metric_spec"
     },
     {
       "level": "gap",

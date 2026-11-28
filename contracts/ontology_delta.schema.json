@@ -1,0 +1,44 @@
+{
+  "$comment": "本体变更提案：任何人发现本体有缺口/错误都提这个，但只有 ontology-admin 能把它落成 ontology/*.yaml。提案本身不改本体。",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ontology_delta",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "stage", "payload"],
+  "properties": {
+    "run_id": { "type": "string", "description": "需求目录名" },
+    "stage": { "type": "string", "enum": ["P1", "P2", "P3", "P4", "P5", "P6", "A1", "A2", "A3", "A4", "A5", "A6"] },
+    "produced_at": { "type": "string" },
+    "producer": { "type": "string" },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requirement_id", "proposer", "reason", "changes"],
+      "properties": {
+        "requirement_id": { "type": "string", "pattern": "^REQ-[0-9]{8}-[0-9]{2}$" },
+        "proposer": { "type": "string", "minLength": 1, "description": "提变更的角色，如 developer-1 / requirement-translator" },
+        "reason": { "type": "string", "minLength": 10, "description": "为什么要改；写不出 10 个字说明还没想清楚" },
+        "impact": { "type": "string", "description": "影响面：哪些已有产出/表/报表会被这次变更波及" },
+        "migration": { "type": "string", "description": "迁移方式：已发布的表怎么过渡" },
+        "changes": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/change" } }
+      }
+    }
+  },
+  "definitions": {
+    "change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op", "kind", "target", "why"],
+      "properties": {
+        "op": { "type": "string", "enum": ["add", "update", "deprecate", "rename"] },
+        "kind": { "type": "string", "enum": ["object", "process", "metric", "dict", "dict_value", "link", "constraint"] },
+        "target": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{2,63}$", "description": "实体 id 或 dict_value 所属的 dict id" },
+        "field": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,40}$", "description": "update/add 时的字段名，如 definition / grain" },
+        "from": { "type": "string", "description": "update 必须写原值，否则等于偷偷改口径" },
+        "to": { "type": "string", "description": "add/update 的新值" },
+        "replacement": { "type": "string", "description": "deprecate 时指向替代项" },
+        "why": { "type": "string", "minLength": 5 }
+      }
+    }
+  }
+}

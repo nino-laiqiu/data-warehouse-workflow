@@ -1,6 +1,6 @@
 # 数仓工作流巡检报告 · 2026-W48
 
-> 生成时间 2026-11-28T10:19:39+08:00　|　健康分 **87**　|　门禁 11/11　|　阻断问题 0 条
+> 生成时间 2026-11-28T10:25:50+08:00　|　健康分 **87**　|　门禁 11/11　|　阻断问题 0 条
 
 ## 一、门禁
 
@@ -27,7 +27,7 @@
 ## 三、资产
 
 - **本体**：17 个文件（draft 17）
-- **契约**：4/9（缺：intent、analysis、requirement、ontology_delta、model_design、metric_spec）
+- **契约**：5/9（缺：intent、analysis、requirement、model_design、metric_spec）
 - **技能**：已实现 3，被引用 14，待建 11
 - **知识**：7 个文件，索引 6 条，未索引 1 个
 
@@ -36,7 +36,7 @@
 - 🟣 **画像标签需求20261122**：G5 未过但 G6 已过（门禁顺序倒挂）
 - 🟡 **画像标签需求20261122 · G5**：未过门，需 H3 上线放行（已挂 5 天）
 - 🟠 **技能**：11 个技能被工作流引用但未实现: sk-ont-validate, sk-sql-dml, sk-sql-guard, sk-sql-diff, sk-dq-gen, sk-lin-build, sk-doc-assemble, sk-qry-intent, sk-qry-locate, sk-qry-gen, sk-qry-check
-- 🟠 **契约**：缺 6 个设计契约: intent, analysis, requirement, ontology_delta, model_design, metric_spec
+- 🟠 **契约**：缺 5 个设计契约: intent, analysis, requirement, model_design, metric_spec
 - 🟠 **知识索引**：1 个知识文件没有 chunk 索引
 
 ## 五、与上周对比

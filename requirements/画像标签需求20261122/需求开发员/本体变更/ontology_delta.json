@@ -1,0 +1,31 @@
+{
+  "run_id": "画像标签需求20261122",
+  "stage": "P2",
+  "produced_at": "2026-11-28T10:30:00+08:00",
+  "producer": "developer-2@1.0.0",
+  "payload": {
+    "requirement_id": "REQ-20261122-02",
+    "proposer": "developer-2",
+    "reason": "12 个标签里有 3 类值域（枚举性别、分档年龄段、数值 GMV），但本体里 TAG 只有 tag_code 和 category，没有机器可读的值域类型；质量规则 DQ-003 只能把枚举硬编码在 assert_sql 里，改一个档位要同时改本体描述和规则，迟早不一致。",
+    "impact": "dws_user_profile_df 的 13 列都受影响；DQ-003/DQ-009 两条规则需要按 value_type 重生成；已上线的宽表结构不变，只是元数据补全。",
+    "migration": "纯元数据变更，不涉及物理表；补完 value_type 后由 tools/dq_to_sql.py 重新生成 dq_check.sql 并与旧版 diff 确认只多了值域断言。",
+    "changes": [
+      {
+        "op": "add",
+        "kind": "object",
+        "target": "TAG",
+        "field": "value_type",
+        "to": "enum | band | numeric | date",
+        "why": "没有值域类型，质量规则和文档只能各写一份枚举，改口径必然不一致"
+      },
+      {
+        "op": "add",
+        "kind": "object",
+        "target": "TAG",
+        "field": "value_domain",
+        "to": "枚举/分档/数值范围的具体取值，与 value_type 配套",
+        "why": "value_type 只说了'是什么类型'，没说'合法值有哪些'，校验器仍然无从判起"
+      }
+    ]
+  }
+}
