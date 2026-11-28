@@ -1,0 +1,267 @@
+{
+  "generated_at": "2026-11-28T10:19:39+08:00",
+  "week": "2026-W48",
+  "summary": {
+    "checks_total": 11,
+    "checks_passed": 11,
+    "score": 87,
+    "block": 0
+  },
+  "checks": [
+    {
+      "name": "本体校验",
+      "group": "门禁",
+      "cmd": [
+        "./ontology/schema/validate.py"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
+      "name": "目录布局",
+      "group": "门禁",
+      "cmd": [
+        "./tools/check_layout.py"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
+      "name": "技能引用",
+      "group": "门禁",
+      "cmd": [
+        "./tools/check_skills.py"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
+      "name": "知识链接",
+      "group": "门禁",
+      "cmd": [
+        "./tools/check_wiki.py"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
+      "name": "需求登记 G0",
+      "group": "门禁",
+      "cmd": [
+        "./skills/sk-req-register/validate.py"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
+      "name": "翻译稿 G1 渠道GMV日报需求20261122",
+      "group": "门禁",
+      "cmd": [
+        "./skills/sk-req-validate/validate.py",
+        "--doc",
+        "requirements/渠道GMV日报需求20261122/需求分析员/REQ-20261122-01.md"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
+      "name": "翻译稿 G1 画像标签需求20261122",
+      "group": "门禁",
+      "cmd": [
+        "./skills/sk-req-validate/validate.py",
+        "--doc",
+        "requirements/画像标签需求20261122/需求分析员/REQ-20261122-02.md"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
+      "name": "质量规则 G4 画像标签需求20261122",
+      "group": "门禁",
+      "cmd": [
+        "./tools/check_dq.py",
+        "requirements/画像标签需求20261122/需求开发员/质量/dq_rules.json"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
+      "name": "血缘 G5 画像标签需求20261122",
+      "group": "门禁",
+      "cmd": [
+        "./tools/check_lineage.py",
+        "requirements/画像标签需求20261122/需求开发员/血缘/lineage.json"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
+      "name": "对比报告 画像标签需求20261122",
+      "group": "门禁",
+      "cmd": [
+        "./tools/validate_contracts.py",
+        "requirements/画像标签需求20261122/需求开发员/监督者/comparison_report.json"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
+      "name": "留痕格式 画像标签需求20261122",
+      "group": "门禁",
+      "cmd": [
+        "./tools/validate_contracts.py",
+        "requirements/画像标签需求20261122/需求开发员/journal.jsonl",
+        "--lines",
+        "--schema",
+        "contracts/journal_entry.schema.json"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    }
+  ],
+  "ontology": {
+    "files": 17,
+    "status": {
+      "draft": 17
+    },
+    "stale_draft": []
+  },
+  "skills": {
+    "implemented": [
+      "sk-req-register",
+      "sk-req-validate",
+      "sk-sql-ddl"
+    ],
+    "referenced": [
+      "sk-doc-assemble",
+      "sk-dq-gen",
+      "sk-lin-build",
+      "sk-ont-validate",
+      "sk-qry-check",
+      "sk-qry-gen",
+      "sk-qry-intent",
+      "sk-qry-locate",
+      "sk-req-register",
+      "sk-req-validate",
+      "sk-sql-ddl",
+      "sk-sql-diff",
+      "sk-sql-dml",
+      "sk-sql-guard"
+    ],
+    "pending": [
+      "sk-ont-validate",
+      "sk-sql-dml",
+      "sk-sql-guard",
+      "sk-sql-diff",
+      "sk-dq-gen",
+      "sk-lin-build",
+      "sk-doc-assemble",
+      "sk-qry-intent",
+      "sk-qry-locate",
+      "sk-qry-gen",
+      "sk-qry-check"
+    ],
+    "orphan": []
+  },
+  "contracts": {
+    "have": [
+      "comparison_report",
+      "dq_rules",
+      "journal_entry",
+      "lineage"
+    ],
+    "missing": [
+      "intent",
+      "analysis",
+      "requirement",
+      "ontology_delta",
+      "model_design",
+      "metric_spec"
+    ],
+    "designed": 9
+  },
+  "knowledge": {
+    "files": 7,
+    "chunks": 6,
+    "uncovered": [
+      "knowledge/04_踩坑/hive-partition-duplicate-column.md"
+    ]
+  },
+  "journals": {
+    "requirements": [
+      {
+        "requirement": "画像标签需求20261122",
+        "events": 46,
+        "gates": {
+          "G0": "pass",
+          "G1": "pass",
+          "G2": "pass",
+          "G3": "pass",
+          "SK-SQL-GUARD": "waived",
+          "G4": "pass",
+          "G6": "pass"
+        },
+        "reached": "G6",
+        "passed_count": 6,
+        "waiting": [
+          "G5"
+        ],
+        "anomalies": [
+          "G5 未过但 G6 已过（门禁顺序倒挂）"
+        ],
+        "last_ts": "2026-11-22T16:58:20+08:00"
+      }
+    ]
+  },
+  "hygiene": {
+    "empty_dirs": []
+  },
+  "problems": [
+    {
+      "level": "anomaly",
+      "where": "画像标签需求20261122",
+      "detail": "G5 未过但 G6 已过（门禁顺序倒挂）"
+    },
+    {
+      "level": "hitl",
+      "where": "画像标签需求20261122 · G5",
+      "detail": "未过门，需 H3 上线放行（已挂 5 天）"
+    },
+    {
+      "level": "gap",
+      "where": "技能",
+      "detail": "11 个技能被工作流引用但未实现: sk-ont-validate, sk-sql-dml, sk-sql-guard, sk-sql-diff, sk-dq-gen, sk-lin-build, sk-doc-assemble, sk-qry-intent, sk-qry-locate, sk-qry-gen, sk-qry-check"
+    },
+    {
+      "level": "gap",
+      "where": "契约",
+      "detail": "缺 6 个设计契约: intent, analysis, requirement, ontology_delta, model_design, metric_spec"
+    },
+    {
+      "level": "gap",
+      "where": "知识索引",
+      "detail": "1 个知识文件没有 chunk 索引"
+    }
+  ],
+  "hitl_backlog": [
+    {
+      "level": "hitl",
+      "where": "画像标签需求20261122 · G5",
+      "detail": "未过门，需 H3 上线放行（已挂 5 天）"
+    }
+  ],
+  "trend": {
+    "prev_week": null
+  }
+}

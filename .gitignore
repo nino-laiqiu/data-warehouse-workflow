@@ -1,6 +1,9 @@
 # 运行产物不入库：A 线的临时 run 放这里；B 线的产物在 requirements/需求开发员/<需求目录>/ 里，正常入库
 runs/*
 !runs/.gitkeep
+# 巡检周报要入库：它是"上周 vs 本周"的对比基线，丢了就没法看趋势
+!runs/inspection/
+!runs/inspection/**
 .tmp/
 
 # Python

@@ -93,11 +93,15 @@ python tools/check_lineage.py requirements/画像标签需求20261122/需求开�
 
 # 10. 从 dq_rules.json 重新生成 dq_check.sql（规则改了就重跑，不手改 SQL）
 python tools/dq_to_sql.py requirements/画像标签需求20261122/需求开发员/质量/dq_rules.json
+
+# 11. 全仓巡检：一条命令跑完全部门禁 + 卫生指标 + 问题清单，出周报
+python tools/inspect.py
 ```
 
-十个校验器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
+十一个校验器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
 
 推送通道的原理、失败排查表、新窗口冷启动清单，见 [`docs/推送流程.md`](docs/推送流程.md)。
+七个核心能力（多智能体协作 / 知识库驱动 / 需求自动化 / 全过程留痕 / 记忆体系 / 开发规范 / 定时巡检）的定义与缺口，见 [`docs/核心能力与自动化.md`](docs/核心能力与自动化.md)。
 
 ## 当前状态
 
