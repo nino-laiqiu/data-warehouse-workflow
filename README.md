@@ -116,6 +116,12 @@ python tools/run_schedule.py --due
 # 16. 知识库改老口径：看影响面 → 登记变更；--check 拦住"改了没登记"
 python tools/wiki_impact.py --changed
 python tools/wiki_impact.py --stamp --note "补了退款回冲说明"
+
+# 17. 追踪：追加六类事件 / 看未关待办 / 校验全部事件 / 回放最近几条
+python tools/journal.py append --req 画像标签需求20261122 --type query --actor chronicler   --sql-file .tmp/smoke.sql --purpose "核对 GMV 与 ADS 一致性" --result "差异 0.003%"
+python tools/journal.py todos --req 画像标签需求20261122
+python tools/journal.py check --req 画像标签需求20261122
+python tools/journal.py show  --req 画像标签需求20261122 --tail 10
 ```
 
 十四个校验器 + 需求雷达 + 调度执行器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
@@ -123,6 +129,7 @@ python tools/wiki_impact.py --stamp --note "补了退款回冲说明"
 推送通道的原理、失败排查表、新窗口冷启动清单，见 [`docs/推送流程.md`](docs/推送流程.md)。
 角色怎么被 subagent 真跑，见 [`docs/角色运行.md`](docs/角色运行.md)；定时怎么接，见 [`docs/调度.md`](docs/调度.md)。
 七个核心能力（多智能体协作 / 知识库驱动 / 需求自动化 / 全过程留痕 / 记忆体系 / 开发规范 / 定时巡检）的定义与缺口，见 [`docs/核心能力与自动化.md`](docs/核心能力与自动化.md)。
+八类核心资产（双轨工作流 / agents / skills / wiki / 记忆 / 追踪 / 定时任务 / 全局规范，加本体作底座）各自的维护者、判据与校验命令，见 [`docs/核心资产.md`](docs/核心资产.md)；全仓约法见 [`docs/全局规范.md`](docs/全局规范.md)。
 
 ## 当前状态
 

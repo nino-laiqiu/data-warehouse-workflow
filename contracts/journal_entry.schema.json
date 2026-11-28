@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "journal_entry.schema.json",
   "title": "journal_entry",
-  "description": "追踪者写入 requirements/<需求目录>/需求开发员/journal.jsonl 的一条事件。一行一个 JSON。",
+  "description": "追踪者写入 requirements/<需求目录>/需求开发员/journal.jsonl 的一条事件。一行一个 JSON，只追加不修改。六类：conversation（问答）/ query（查询 SQL）/ artifact（修改事件）/ progress（进展）/ todo（待办）/ gate（门禁）。每类的必填字段在 tools/journal.py 的 REQUIRED_BY_TYPE 里，schema 只保证结构不写成别的东西。",
   "type": "object",
   "additionalProperties": false,
   "required": ["ts", "run_id", "type", "actor"],
@@ -12,51 +12,63 @@
       "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
       "description": "ISO8601 带时区，如 2026-11-22T15:40:12+08:00"
     },
-    "run_id": {
-      "type": "string",
-      "minLength": 1
-    },
+    "run_id": { "type": "string", "minLength": 1 },
     "type": {
-      "enum": ["conversation", "artifact", "gate"]
+      "enum": ["conversation", "query", "artifact", "progress", "todo", "gate"]
     },
     "actor": {
       "type": "string",
       "minLength": 1,
-      "description": "谁触发的：角色名或人"
+      "description": "谁触发的：角色 id 或人（历史条目里的旧角色名保留不改）"
     },
     "summary": {
       "type": "string",
       "minLength": 1,
-      "description": "conversation 用：这一轮的结论与决策，不存逐字原文"
+      "description": "conversation 必填：这一轮的结论与决策，不存逐字原文"
     },
-    "path": {
-      "type": "string",
-      "description": "artifact 用：被创建或修改的文件路径"
+    "question": { "type": "string", "description": "conversation 可选：人问的原话（可截断）" },
+    "answer": { "type": "string", "description": "conversation 可选：给出了什么答复" },
+
+    "sql": { "type": "string", "description": "query 必填：实际执行的 SQL 全文" },
+    "sql_hash": { "type": "string", "description": "query 可选：SQL 的 sha256，用来判重与追溯" },
+    "purpose": { "type": "string", "description": "query 必填：为什么要查这条" },
+    "engine": { "enum": ["hive", "spark", "presto", "other"], "description": "query 可选：执行引擎" },
+    "result_summary": { "type": "string", "description": "query 必填：查到了什么（数字/结论），不贴大表" },
+    "rowcount": { "type": "integer", "description": "query 可选：返回行数" },
+    "duration_ms": { "type": "integer", "description": "query 可选：耗时毫秒" },
+
+    "path": { "type": "string", "description": "artifact 必填：被创建或修改的文件路径" },
+    "hash_before": { "type": "string", "description": "artifact 可选：改动前 sha256，新建为空串" },
+    "hash_after": { "type": "string", "description": "artifact 必填：改动后 sha256" },
+    "diff_summary": { "type": "string", "description": "artifact 可选：改了什么（一句话）" },
+
+    "stage": {
+      "enum": ["P0", "P1", "P2", "P3", "P4", "P5", "P6", "A1", "A2", "A3", "A4", "A5", "A6"],
+      "description": "progress 必填：在哪个阶段"
     },
-    "hash_before": {
-      "type": "string",
-      "description": "artifact 用：改动前的 sha256，新建时为空串"
+    "state": {
+      "enum": ["started", "done", "blocked"],
+      "description": "progress 必填：进展状态"
     },
-    "hash_after": {
-      "type": "string",
-      "description": "artifact 用：改动后的 sha256"
+    "next": { "type": "string", "description": "progress 可选：下一步做什么（blocked 时写卡在哪）" },
+
+    "text": { "type": "string", "description": "todo 必填：待办内容" },
+    "owner": { "type": "string", "description": "todo 必填：谁来办（角色 id 或人）" },
+    "status": {
+      "enum": ["open", "done", "dropped"],
+      "description": "todo 必填：open/done/dropped，关单时追加一条同 todo_id 的 done/dropped"
     },
-    "gate": {
-      "type": "string",
-      "description": "gate 用：G0-G6 或 GA1-GA3"
-    },
-    "result": {
-      "enum": ["pass", "fail", "waived"],
-      "description": "gate 用"
-    },
-    "reason": {
-      "type": "string",
-      "description": "gate 失败时的机器可读原因"
-    },
+    "due": { "type": "string", "description": "todo 可选：期望完成日期" },
+
+    "gate": { "type": "string", "description": "gate 必填：G0-G6 或 GA1-GA3" },
+    "result": { "enum": ["pass", "fail", "waived"], "description": "gate 必填" },
+    "reason": { "type": "string", "description": "gate 在 fail/waived 时必填：原因要机器可读；pass 可用 refs 指向检查输出" },
+
+    "todo_id": { "type": "string", "description": "todo 用：T-YYYYMMDD-NN；关单时引用同一个 id" },
     "refs": {
       "type": "array",
       "items": { "type": "string" },
-      "description": "引用：契约文件名、commit sha、需求编号等"
+      "description": "引用：契约文件名、commit sha、需求编号、知识条目 id 等"
     },
     "supersedes": {
       "type": "string",

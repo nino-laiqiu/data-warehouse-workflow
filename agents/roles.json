@@ -5,17 +5,47 @@
     "<需求目录>": "requirements/<短名>需求<YYYYMMDD>",
     "<run>": "requirements/<短名>需求<YYYYMMDD>/需求开发员"
   },
-  "tools": ["read", "write", "edit", "glob", "grep", "pwsh", "subagent"],
+  "tools": [
+    "read",
+    "write",
+    "edit",
+    "glob",
+    "grep",
+    "pwsh",
+    "subagent"
+  ],
   "roles": [
     {
       "id": "requirement-translator",
       "name": "需求分析员",
-      "stages": ["P0", "P1", "P4", "A5"],
+      "stages": [
+        "P0",
+        "P1",
+        "P4",
+        "A5"
+      ],
       "gate": "G1",
-      "tools": ["read", "write", "edit", "glob", "grep", "pwsh"],
-      "writes": ["<需求目录>/需求分析员/**", "<run>/质量/**"],
-      "must_not_read": ["<run>/developer-1/**", "<run>/developer-2/**"],
-      "inputs": ["<需求目录>/反馈者/REQ-*.md", "ontology/**", "knowledge/wiki/**"],
+      "tools": [
+        "read",
+        "write",
+        "edit",
+        "glob",
+        "grep",
+        "pwsh"
+      ],
+      "writes": [
+        "<需求目录>/需求分析员/**",
+        "<run>/质量/**"
+      ],
+      "must_not_read": [
+        "<run>/developer-1/**",
+        "<run>/developer-2/**"
+      ],
+      "inputs": [
+        "<需求目录>/反馈者/REQ-*.md",
+        "ontology/**",
+        "knowledge/wiki/**"
+      ],
       "outputs": [
         "<需求目录>/需求分析员/REQ-*-translation.md",
         "<run>/本体变更/ontology_delta.json",
@@ -26,11 +56,26 @@
     {
       "id": "developer-1",
       "name": "开发者 1",
-      "stages": ["P2", "P5"],
+      "stages": [
+        "P2",
+        "P5"
+      ],
       "gate": "G2",
-      "tools": ["read", "write", "edit", "glob", "grep", "pwsh"],
-      "writes": ["<run>/developer-1/**", "<run>/血缘/**"],
-      "must_not_read": ["<run>/developer-2/**"],
+      "tools": [
+        "read",
+        "write",
+        "edit",
+        "glob",
+        "grep",
+        "pwsh"
+      ],
+      "writes": [
+        "<run>/developer-1/**",
+        "<run>/血缘/**"
+      ],
+      "must_not_read": [
+        "<run>/developer-2/**"
+      ],
       "inputs": [
         "<需求目录>/需求分析员/REQ-*-translation.md",
         "<run>/监督者/final/*.sql",
@@ -49,12 +94,29 @@
     {
       "id": "developer-2",
       "name": "开发者 2",
-      "stages": ["P2"],
+      "stages": [
+        "P2"
+      ],
       "gate": "G2",
-      "tools": ["read", "write", "edit", "glob", "grep", "pwsh"],
-      "writes": ["<run>/developer-2/**"],
-      "must_not_read": ["<run>/developer-1/**"],
-      "inputs": ["<需求目录>/需求分析员/REQ-*-translation.md", "ontology/**", "knowledge/wiki/**"],
+      "tools": [
+        "read",
+        "write",
+        "edit",
+        "glob",
+        "grep",
+        "pwsh"
+      ],
+      "writes": [
+        "<run>/developer-2/**"
+      ],
+      "must_not_read": [
+        "<run>/developer-1/**"
+      ],
+      "inputs": [
+        "<需求目录>/需求分析员/REQ-*-translation.md",
+        "ontology/**",
+        "knowledge/wiki/**"
+      ],
       "outputs": [
         "<run>/developer-2/sql/*.sql",
         "<run>/developer-2/design-notes.md",
@@ -65,10 +127,21 @@
     {
       "id": "supervisor",
       "name": "监督者",
-      "stages": ["P3"],
+      "stages": [
+        "P3"
+      ],
       "gate": "G3",
-      "tools": ["read", "write", "edit", "glob", "grep", "pwsh"],
-      "writes": ["<run>/监督者/**"],
+      "tools": [
+        "read",
+        "write",
+        "edit",
+        "glob",
+        "grep",
+        "pwsh"
+      ],
+      "writes": [
+        "<run>/监督者/**"
+      ],
       "must_not_read": [],
       "inputs": [
         "<run>/developer-1/**",
@@ -87,20 +160,34 @@
     {
       "id": "chronicler",
       "name": "追踪者",
-      "stages": ["ALL"],
+      "stages": [
+        "ALL"
+      ],
       "gate": null,
       "gate_reason": "横切角色，记录别人的门禁结果，自己产不出门禁产物",
-      "tools": ["read", "write", "glob", "grep", "pwsh"],
-      "writes": ["<run>/journal.jsonl", "<run>/交付/**"],
+      "tools": [
+        "read",
+        "write",
+        "glob",
+        "grep",
+        "pwsh"
+      ],
+      "writes": [
+        "<run>/journal.jsonl",
+        "<run>/交付/**"
+      ],
       "must_not_read": [],
-      "inputs": ["<run>/**", "<需求目录>/需求分析员/REQ-*-translation.md"],
+      "inputs": [
+        "<run>/**",
+        "<需求目录>/需求分析员/REQ-*-translation.md"
+      ],
       "outputs": [
         "<run>/journal.jsonl",
         "<run>/交付/README.md",
         "<run>/交付/上线单.md",
         "<run>/交付/口径变更说明.md"
       ],
-      "notes": "四件事：① 每个 stage 前后、每次产物变更、每次门禁判定都记一条（只追加、不存原文只存摘要+引用）；② 不参与任何决策；③ P6 交付文档由它汇总——素材是 journal + final SQL + 翻译稿，数据字典和上线单本来就是「记录」的产物；④ 与需求原文的偏差由需求分析员给出，它只负责如实写进去、不改口径。"
+      "notes": "记录六类事件：conversation（问答/决策）、query（查询 SQL，必须走 --sql-file 并算 sql_hash）、artifact（产物修改，记 path + hash_before/after）、progress（进展，started/done/blocked，blocked 必须写 next）、todo（待办，编号 T-YYYYMMDD-NN，开单与关单都追加）、gate（门禁判定）。三条硬规则：只追加不修改、不存原文只存摘要+引用、不参与决策。P6 交付文档由它汇总——素材是 journal + final SQL + 翻译稿；与需求原文的偏差由需求分析员给出，它只如实写、不改口径。写入口 tools/journal.py，说明 docs/追踪.md。"
     }
   ]
 }

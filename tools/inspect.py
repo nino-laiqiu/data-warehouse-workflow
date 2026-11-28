@@ -102,6 +102,9 @@ def build_checks() -> list[dict]:
             add(f"留痕格式 {req.name}", "门禁",
                 py("tools", "validate_contracts.py") + [rel(f), "--lines",
                                                        "--schema", "contracts/journal_entry.schema.json"])
+        if (d / "journal.jsonl").exists():
+            add(f"留痕完整性 {req.name}", "门禁",
+                py("tools", "journal.py") + ["check", "--req", req.name])
     return checks
 
 
@@ -213,9 +216,29 @@ def journal_stats() -> dict:
                         later = [g for g in passed if GATES.index(g) > i]
                         if later:
                             anomalies.append(f"{GATES[i]} 未过但 {'、'.join(later)} 已过（门禁顺序倒挂）")
+            todos: dict[str, dict] = {}
+            for e in entries:
+                if e.get("type") == "todo" and e.get("todo_id"):
+                    todos[e["todo_id"]] = e
+            open_todos = [k for k, v in todos.items() if v.get("status") == "open"]
+
+            blocked = [e for e in entries
+                       if e.get("type") == "progress" and e.get("state") == "blocked"]
+            blocked_days = 0
+            if blocked:
+                try:
+                    from datetime import datetime
+                    ts = max(e.get("ts", "") for e in blocked)
+                    blocked_days = (datetime.now().astimezone()
+                                    - datetime.fromisoformat(ts)).days
+                except ValueError:
+                    blocked_days = 0
+
             rows.append({
                 "requirement": req.name,
                 "events": len(entries),
+                "open_todos": open_todos,
+                "blocked_days": blocked_days,
                 "gates": gates,
                 "reached": reached,
                 "passed_count": len(passed),
@@ -344,10 +367,15 @@ def render_md(r: dict) -> str:
         mark = "✅" if c["ok"] else "❌"
         lines.append(f"| {c['name']} | {mark} | {c['reason'] or '—'} |")
 
-    lines += ["", "## 二、需求闭环", "", "| 需求 | 事件 | 已过门禁 | 最远 | 未过门 | 最后留痕 |", "|---|---|---|---|---|---|"]
+    lines += ["", "## 二、需求闭环", "",
+              "| 需求 | 事件 | 已过门禁 | 最远 | 未过门 | 未关待办 | 卡住天数 | 最后留痕 |",
+              "|---|---|---|---|---|---|---|---|"]
     for j in r["journals"]["requirements"]:
         waiting = "、".join(j["waiting"]) or "—"
-        lines.append(f"| {j['requirement']} | {j['events']} | {j['passed_count']}/7 | {j['reached']} | {waiting} | {j['last_ts'] or '—'} |")
+        todos = "、".join(j.get("open_todos") or []) or "0"
+        stuck = j.get("blocked_days") or 0
+        stuck_s = f"{stuck} 天" + (" ⚠️" if stuck > 5 else "") if stuck else "—"
+        lines.append(f"| {j['requirement']} | {j['events']} | {j['passed_count']}/7 | {j['reached']} | {waiting} | {todos} | {stuck_s} | {j['last_ts'] or '—'} |")
 
     o, k = r["ontology"], r["knowledge"]
     status = "、".join(f"{x} {y}" for x, y in sorted(o["status"].items()))
