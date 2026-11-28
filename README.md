@@ -110,9 +110,13 @@ python tools/role_prompt.py --role developer-1 --req 画像标签需求20261122 
 # 15. 定时任务：看清单 / 跑此刻到点的 / 全跑一遍
 python tools/run_schedule.py --list
 python tools/run_schedule.py --due
+
+# 16. 知识库改老口径：看影响面 → 登记变更；--check 拦住"改了没登记"
+python tools/wiki_impact.py --changed
+python tools/wiki_impact.py --stamp --note "补了退款回冲说明"
 ```
 
-十三个校验器 + 需求雷达 + 调度执行器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
+十四个校验器 + 需求雷达 + 调度执行器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
 
 推送通道的原理、失败排查表、新窗口冷启动清单，见 [`docs/推送流程.md`](docs/推送流程.md)。
 角色怎么被 subagent 真跑，见 [`docs/角色运行.md`](docs/角色运行.md)；定时怎么接，见 [`docs/调度.md`](docs/调度.md)。

@@ -1,6 +1,8 @@
-{"id":"k-0001","path":"03_范例/example-gmv-by-channel.md","title":"从问句到可信 SQL：各渠道 GMV 走查","tags":["ecommerce","gmv","sql","example"],"verified_by":"manual"}
-{"id":"k-0002","path":"wiki/01-命名与词根.md","title":"命名规范与常用词根（amt/cnt/qty/rate）","tags":["naming","glossary","standard"],"verified_by":null}
-{"id":"k-0003","path":"wiki/02-度量与指标.md","title":"度量清单与 12 个常用指标公式","tags":["metric","measure","additivity"],"verified_by":null}
-{"id":"k-0004","path":"wiki/03-事实表.md","title":"10 张常用事实表：粒度/主键/上下游/坑","tags":["table","dwd","dws","ads"],"verified_by":null}
-{"id":"k-0005","path":"wiki/04-维表.md","title":"6 张维表与 SCD 取数写法","tags":["dim","scd","join"],"verified_by":null}
-{"id":"k-0006","path":"wiki/05-取数路径.md","title":"取数决策树：先选表再写 SQL","tags":["routing","query","ads"],"verified_by":null}
+{"id": "k-0001", "path": "03_范例/example-gmv-by-channel.md", "title": "从问句到可信 SQL：各渠道 GMV 走查", "tags": ["ecommerce", "gmv", "sql", "example"], "verified_by": "manual", "sha256": "6b440879b6279ff2567d097b01f588c6602c70ca75f426e00a493f43426714ca", "updated": "2026-11-28"}
+{"id": "k-0002", "path": "wiki/01-命名与词根.md", "title": "命名规范与常用词根（amt/cnt/qty/rate）", "tags": ["naming", "glossary", "standard"], "verified_by": null, "sha256": "07561f72d55b780c0f651c538fd8a352d38480fdc278c4efae18a05fb44cd4a4", "updated": "2026-11-28"}
+{"id": "k-0003", "path": "wiki/02-度量与指标.md", "title": "度量清单与 12 个常用指标公式", "tags": ["metric", "measure", "additivity"], "verified_by": null, "sha256": "196c92a29bc22e83301e7904748a0ee878aafe74e5afc56a67b2e08242d5b688", "updated": "2026-11-28"}
+{"id": "k-0004", "path": "wiki/03-事实表.md", "title": "10 张常用事实表：粒度/主键/上下游/坑", "tags": ["table", "dwd", "dws", "ads"], "verified_by": null, "sha256": "64a633e3fdfe6966f94f9e9804f74397a0dd2112bafd90b3eea14bd4a10c8414", "updated": "2026-11-28"}
+{"id": "k-0005", "path": "wiki/04-维表.md", "title": "6 张维表与 SCD 取数写法", "tags": ["dim", "scd", "join"], "verified_by": null, "sha256": "98ce233fe654c9d8ddb82316239fdd941316c01b2b54ed791b85aaa41424ea8d", "updated": "2026-11-28"}
+{"id": "k-0006", "path": "wiki/05-取数路径.md", "title": "取数决策树：先选表再写 SQL", "tags": ["routing", "query", "ads"], "verified_by": null, "sha256": "a16747c871812c3b7d200a5847c4b893f7b849e5af21a16be5360f04e4f916f3", "updated": "2026-11-28"}
+{"id": "k-0007", "path": "04_踩坑/hive-partition-duplicate-column.md", "title": "hive-partition-duplicate-column", "tags": [], "verified_by": null, "sha256": "7ee40a31aedb79c33f6756e941f26eddc7ed82340c35b4ec1a5b32a8e50c9d0a", "updated": "2026-11-28"}
+{"id": "k-0010", "path": "wiki/README.md", "title": "README", "tags": [], "verified_by": null, "sha256": "f9d58ee14f8eaa3472d5b1fdbbec0c293fba498c69e829bf6377af73d9c81470", "updated": "2026-11-28"}

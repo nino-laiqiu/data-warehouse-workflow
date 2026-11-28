@@ -27,12 +27,28 @@
 3. **不写口径**。发现口径类内容，转成 `ontology_delta` 提案交给本体管理员。
 4. **标注适用版本**：Hive 2 vs 3、Spark 2.4 vs 3.x 行为不同的必须写明。
 
+## 新增 vs 改老口径
+
+**新增一页 / 新增一节** → 直接加，不用影响分析。
+
+**改已有页面的内容**（尤其是口径、公式、字段含义、结论）→ 三步：
+
+```bash
+python tools/wiki_impact.py --changed                     # 1. 看谁在用它：被链接、被引用
+python tools/wiki_impact.py --stamp --note "变了什么"      # 2. 更新指纹 + 写进 knowledge/index.md
+python tools/wiki_impact.py --check                       # 3. 确认没有漏登记（巡检也会跑）
+```
+
+为什么必须做：知识库的杀伤力在"被引用"。改了 `04_踩坑/` 里某条结论，下游可能有 SQL 注释、DQ 规则、另一篇范例在引用它；不跑影响分析，你永远不知道改动了谁。`--check` 会拦住"改了但没登记"的情况——**没登记的改动等于没发生过**，三个月后没人能解释为什么改。
+
+登记落在 [`index.md`](index.md) 的「变更记录」表：日期 / 文档 / 变了什么 / 影响面 / 谁改的。指纹（sha256）落在 `index/chunks.jsonl`，是机器判"改没改"的依据。
+
 ## 索引
 
 `index/chunks.jsonl` 是检索用的元数据，每行一条：
 
 ```json
-{"id":"k-0012","path":"04_踩坑/pay-dup-callback.md","title":"支付回调重复","tags":["ecommerce","dedup"],"verified_by":"DQ-ORD-003"}
+{"id":"k-0012","path":"04_踩坑/pay-dup-callback.md","title":"支付回调重复","tags":["ecommerce","dedup"],"verified_by":"DQ-ORD-003","sha256":"…"}
 ```
 
 检索时先按 `tags` 粗筛，再由 LLM 读原文——不要把所有知识库塞进上下文，那是把知识库当缓存用。

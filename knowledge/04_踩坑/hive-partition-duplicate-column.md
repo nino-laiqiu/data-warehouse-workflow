@@ -33,3 +33,10 @@ PARTITIONED BY (dt STRING COMMENT '日期分区')
 
 `python skills/sk-sql-ddl/validate.py --sql xxx.sql` 会检查这条（2026-11-22 补充）。
 这个错误来自 REQ-20261122-02 双轨开发里 track-2 的产出，是"双轨制顺手改进工具链"的实例。
+
+## 检查落在哪
+
+实现是 `skills/sk-sql-ddl/validate.py` 的 `check_partition_not_in_columns()`：解析 `PARTITIONED BY (...)` 里的列名集合，与前面的列定义行求交，命中就报
+`分区列 X 同时出现在列定义里，Hive 会报重复列`。
+
+**纯 SQL 模式也会跑**（不给 `--input` 也一样），所以 CI 只拿一份 DDL 就能拦。反例放在 `.tmp/dup-partition.sql`，改这个检查时拿它回归。
