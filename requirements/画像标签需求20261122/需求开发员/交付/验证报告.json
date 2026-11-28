@@ -3,7 +3,7 @@
   "stage": "P6",
   "payload": {
     "requirement_id": "REQ-20261122-02",
-    "generated_at": "2026-11-28T10:58:04+08:00",
+    "generated_at": "2026-11-28T11:12:10+08:00",
     "environment": {
       "mode": "offline",
       "engine": "none",
@@ -141,7 +141,15 @@
       "verdict": "pending"
     },
     "signoff": {
-      "status": "pending"
+      "status": "waived",
+      "by": "nino",
+      "at": "2026-11-28T11:12:10+08:00",
+      "waiver": {
+        "reason": "方法论阶段没有现网连接，只有离线断言清单；放行依据是流程与规则自洽，数据证据待接入后补",
+        "expires_at": "2026-12-12",
+        "followup_todo": "T-20261128-04",
+        "approver": "nino"
+      }
     },
     "notes": [
       "离线生成：未连接现网，所有条目 verdict=skip，报告不得作为 H3 放行依据。",

@@ -235,7 +235,8 @@ def journal_stats() -> dict:
                 if e.get("type") == "gate" and e.get("gate"):
                     gates[e["gate"]] = e.get("result")
             last = max((e.get("ts", "") for e in entries), default="")
-            passed = [g for g in GATES if gates.get(g) == "pass"]
+            passed = [g for g in GATES if gates.get(g) in ("pass", "waived")]
+            waived = [g for g in GATES if gates.get(g) == "waived"]
             reached = passed[-1] if passed else "—"
             waiting = [g for g in GATES if g not in gates]
             anomalies = []
@@ -274,6 +275,7 @@ def journal_stats() -> dict:
                 "passed_count": len(passed),
                 "waiting": waiting,
                 "anomalies": anomalies,
+                "waived": waived,
                 "last_ts": last,
             })
     return {"requirements": rows}
@@ -321,6 +323,9 @@ def collect() -> dict:
             problems.append({"level": "hitl" if g in HITL else "gap",
                              "where": f"{r['requirement']} · {g}",
                              "detail": (f"未过门，需 {HITL[g]}" if g in HITL else "未过门") + (f"（已挂 {days}）" if days else "")})
+        for g in r.get("waived", []):
+            problems.append({"level": "stale", "where": f"{r['requirement']} · {g}",
+                             "detail": "有条件放行（waived）：到期前必须补现网证据，否则视为未放行"})
     for f in ont["stale_draft"]:
         problems.append({"level": "stale", "where": f, "detail": "status: draft 超过 90 天，需复审判定"})
     if sk["pending"]:

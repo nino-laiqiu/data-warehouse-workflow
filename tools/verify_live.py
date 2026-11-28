@@ -174,6 +174,10 @@ def render_md(rep: dict) -> str:
         f"- 签署：{p['signoff']['status']}",
         "",
     ]
+    if p["signoff"]["status"] == "waived":
+        w = p["signoff"]["waiver"]
+        head += [f"> ⚠️ **有条件放行（waived）**：{w['reason']}",
+                 f"> 到期 **{w['expires_at']}**，跟进待办 {w.get('followup_todo') or '（未登记）'}；到期未补证据即视为未放行。", ""]
     if env["mode"] == "offline":
         head += ["> ⚠️ 这是离线生成的清单，**没有任何现网证据**。H3 放行前必须重新以 online 模式跑一次。", ""]
     rows = ["| # | 规则 | 类别 | 期望 | 实际 | 结论 | 证据 |", "|---|---|---|---|---|---|---|"]
@@ -221,6 +225,19 @@ def main(argv: list[str]) -> int:
         cmd = env_cmd.split()
 
     rep = build(req, mode, engine, target, a.get("--dt", ""), cmd)
+
+    if "--waive" in a:
+        reason, until = a.get("--reason", ""), a.get("--until", "")
+        if len(reason) < 10 or not until:
+            print("[FAIL] --waive 需要 --reason（≥10 字，写清为什么没有现网证据）与 --until YYYY-MM-DD", file=sys.stderr)
+            return 2
+        rep["payload"]["signoff"] = {
+            "status": "waived",
+            "by": a.get("--by", "nino"),
+            "at": now(),
+            "waiver": {"reason": reason, "expires_at": until,
+                       "followup_todo": a.get("--followup", ""), "approver": a.get("--by", "nino")},
+        }
     out_dir = req / "需求开发员" / "交付"
     out_dir.mkdir(parents=True, exist_ok=True)
     jp, mp = out_dir / "验证报告.json", out_dir / "验证报告.md"

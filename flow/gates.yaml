@@ -70,6 +70,11 @@ lane_b:
       - 血缘图完整，无孤立表
       - 调度依赖已声明，且不形成环
       - 回滚方案已写
+      - 验证报告 signoff 为 passed，或为 waived 且带 reason/expires_at/followup_todo
+    rules:
+      - pending 的报告不许签 G5——"没证据"和"证据不足"是两回事
+      - waived 到期未补现网证据，本门禁自动回到未放行（巡检每周复查）
+      - 豁免只能签"进测试环境"，进生产必须 passed
     on_fail: 挂起等人
 
   - id: G6
