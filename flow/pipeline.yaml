@@ -1,7 +1,9 @@
 # 两条车道的 stage 定义。改这里之前先读 docs/设计文档-数仓智能开发工作流.md §6
 #
 # 每个 stage 必须显式声明 skills（没有就写 []），这是"这一步调用什么技能"的唯一权威来源。
-# 改完跑：python tools/check_skills.py
+# 每个 stage 必须显式声明 depends_on（没有前置就写 []），这是"谁必须等谁"的唯一权威来源——
+# 文档里的段落顺序机器读不出来，派活只认 depends_on。只有 P2 声明 parallel_tracks。
+# 改完跑：python tools/check_skills.py && python tools/check_pipeline.py
 version: 2
 
 defaults:
@@ -22,6 +24,7 @@ lane_b_develop:
       in: 原始需求（群/邮件/会议/工单）
       out: requirements/<需求目录>/反馈者/REQ-*.md + sha256 登记
       gate: G0
+      depends_on: []
 
     - id: P1
       name: 需求翻译
@@ -30,6 +33,7 @@ lane_b_develop:
       in: inbox 原始需求
       out: requirements/<需求目录>/需求分析员/REQ-*.md（8 段，待确认项为空）
       gate: G1                # 含 HITL：H1 口径确认
+      depends_on: [P0]
 
     - id: P2
       name: 双轨开发
@@ -38,6 +42,8 @@ lane_b_develop:
       in: requirements/<需求目录>/需求分析员/REQ-*.md 翻译稿 + ontology + knowledge
       out: requirements/<需求目录>/需求开发员/developer-{1,2}/（sql + design-notes.md + self-check.md）
       gate: G2
+      depends_on: [P1]
+      parallel_tracks: [developer-1, developer-2]   # 唯一允许并行的 stage
 
     - id: P3
       name: 监督比对
@@ -46,6 +52,8 @@ lane_b_develop:
       in: track-1 + track-2
       out: requirements/<需求目录>/需求开发员/监督者/{comparison.md,verdict.md,final/}
       gate: G3                # 含 HITL：H2 方案裁决评审
+      depends_on: [P2]
+      # P3 必须等两轨都完成：监督者不与开发者并行，否则它比的是半成品
 
     - id: P4
       name: 质量规则
@@ -54,6 +62,7 @@ lane_b_develop:
       in: final/ + metric_spec
       out: dq_rules
       gate: G4
+      depends_on: [P3]
 
     - id: P5
       name: 血缘与调度
@@ -62,6 +71,7 @@ lane_b_develop:
       in: final/ + dq_rules
       out: lineage + dag
       gate: G5                # 含 HITL：H3 上线放行
+      depends_on: [P4]
 
     - id: P6
       name: 文档交付
@@ -70,6 +80,7 @@ lane_b_develop:
       in: 以上全部
       out: 交付文档 + 口径变更说明
       gate: G6
+      depends_on: [P5]
 
 lane_a_analyze:
   purpose: 数据分析人员：问一个数，拿到可信结果与可复现的 SQL
@@ -82,6 +93,7 @@ lane_a_analyze:
       in: 自然语言问题
       out: intent
       gate: GA1
+      depends_on: []
 
     - id: A2
       name: 找数定位
@@ -90,6 +102,7 @@ lane_a_analyze:
       in: intent
       out: 候选表与字段（ADS>DWS>DWD>ODS）
       gate: GA1
+      depends_on: [A1]
 
     - id: A3
       name: 查询生成
@@ -98,6 +111,7 @@ lane_a_analyze:
       in: intent + 定位结果
       out: analysis
       gate: GA2
+      depends_on: [A2]
 
     - id: A4
       name: 结果自检
@@ -106,6 +120,7 @@ lane_a_analyze:
       in: analysis
       out: 自检报告
       gate: GA3
+      depends_on: [A3]
 
     - id: A5
       name: 结论生成
@@ -114,6 +129,7 @@ lane_a_analyze:
       in: 查询结果 + 自检报告
       out: 结论（禁用因果表述）
       gate: GA3
+      depends_on: [A4]
 
     - id: A6
       name: 沉淀
@@ -122,6 +138,7 @@ lane_a_analyze:
       in: 本次 run
       out: memory/ 提案或 knowledge/ 范例
       gate: 无
+      depends_on: [A5]
 
 # 横切角色：不属于任何单个 stage，但每个 stage 前后都要触发
 cross_cutting:
@@ -133,6 +150,8 @@ cross_cutting:
 # 硬规则：写在流程定义里，不靠人记
 hard_rules:
   - 双轨隔离：developer-1 与 developer-2 不得读取对方目录，违反即 G2 失败
+  - 监督者不与开发者并行：P3 必须在 P2 两轨都交付完成（sql/ + design-notes.md + self-check.md）后才开始；
+    拿半成品比对，等于用不完整的信息做裁决
   - P2 期间禁止任何"对齐一下"的沟通；分歧留到 P3 由 supervisor 裁决
   - 口径冲突一律退回 P1，supervisor 不得自行拍定
   - A 线 SQL 只能只读，且必须带 dt 分区过滤（<=90 天）

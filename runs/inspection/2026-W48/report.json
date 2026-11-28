@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-11-28T11:42:24+08:00",
+  "generated_at": "2026-11-28T13:28:36+08:00",
   "week": "2026-W48",
   "summary": {
-    "checks_total": 18,
-    "checks_passed": 18,
+    "checks_total": 19,
+    "checks_passed": 19,
     "score": 85,
     "block": 0
   },
@@ -43,6 +43,16 @@
       "group": "门禁",
       "cmd": [
         "./tools/check_skills.py"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
+      "name": "流程顺序",
+      "group": "门禁",
+      "cmd": [
+        "./tools/check_pipeline.py"
       ],
       "optional": false,
       "ok": true,
@@ -316,7 +326,7 @@
       },
       {
         "requirement": "画像标签需求20261122",
-        "events": 69,
+        "events": 70,
         "open_todos": [
           "T-20261128-02",
           "T-20261128-03",
@@ -340,7 +350,7 @@
         "waived": [
           "G5"
         ],
-        "last_ts": "2026-11-28T11:40:56+08:00"
+        "last_ts": "2026-11-28T13:22:03+08:00"
       }
     ]
   },

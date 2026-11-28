@@ -15,7 +15,7 @@
 
 - `requirements/画像标签需求20261122/需求开发员/developer-1/**`
 - `requirements/画像标签需求20261122/需求开发员/developer-2/**`
-- `requirements/画像标签需求20261122/需求分析员/REQ-*-translation.md`
+- `requirements/画像标签需求20261122/需求分析员/REQ-*.md`
 - `ontology/**`
 
 ## 交付物（缺一样 G 就过不了）

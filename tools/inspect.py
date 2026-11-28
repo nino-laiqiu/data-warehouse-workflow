@@ -80,6 +80,7 @@ def build_checks() -> list[dict]:
     add("角色定义", "门禁", py("tools", "check_agents.py"))
     add("目录布局", "门禁", py("tools", "check_layout.py"))
     add("技能引用", "门禁", py("tools", "check_skills.py"))
+    add("流程顺序", "门禁", py("tools", "check_pipeline.py"))
     add("知识链接", "门禁", py("tools", "check_wiki.py"))
     add("知识变更登记", "门禁", py("tools", "wiki_impact.py") + ["--check"])
     add("需求登记 G0", "门禁", py("skills", "sk-req-register", "validate.py"))

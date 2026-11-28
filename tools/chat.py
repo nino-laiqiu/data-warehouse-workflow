@@ -276,7 +276,32 @@ def act_journal(run_id_: str, type_: str | None) -> dict:
     return {"run_id": run_id_, "count": len(events), "events": events[-50:]}
 
 
+def _track_complete(req: str, n: int) -> list:
+    """某条轨道是否交付完成：sql/ 里有脚本，且两个说明文件都在。返回缺什么。"""
+    d = ROOT / "requirements" / req / "需求开发员" / f"developer-{n}"
+    if not d.exists():
+        return [f"developer-{n}/ 目录不存在"]
+    miss = []
+    sqls = [p for p in (d / "sql").glob("*.sql")] if (d / "sql").exists() else []
+    if not sqls:  # 兼容早期布局：SQL 直接放在轨道根目录
+        sqls = [p for p in d.glob("*.sql")]
+    if not sqls:
+        miss.append(f"developer-{n}/ 里没有 .sql（sql/ 或根目录）")
+    for f in ("design-notes.md", "self-check.md"):
+        if not (d / f).exists():
+            miss.append(f"developer-{n}/{f}")
+    return miss
+
+
 def act_task(role: str, req: str, stage: str) -> dict:
+    # 顺序约束：监督者不能和两个开发者并行派活——它必须等两轨都交付完成。
+    # 这条以前只写在文档里（"P3 → P2"），机器不认；现在派活前先查一遍。
+    if role == "supervisor":
+        gaps = _track_complete(req, 1) + _track_complete(req, 2)
+        if gaps:
+            return {"ok": False, "role": role, "stage": stage, "prompt_path": None,
+                    "detail": "不派活：监督者必须在两轨都完成后开始（P3 depends_on P2）。缺：" + "；".join(gaps)}
+
     cmd = [PY, str(ROOT / "tools" / "role_prompt.py"), "--role", role, "--req", req, "--write"]
     r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
     prompt_path = None

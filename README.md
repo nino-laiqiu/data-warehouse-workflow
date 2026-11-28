@@ -88,8 +88,9 @@ python tools/check_wiki.py
 # 6. 校验技能引用：工作流里写了什么技能，就必须有什么目录（反过来也查）
 python tools/check_skills.py
 
-# 7. 校验需求目录布局：三个角色目录同名、开发目录结构齐全、没有平铺
+# 7. 校验需求目录布局 + 派活顺序（每 stage 必须有 depends_on；只有 P2 允许并行；监督者必须等两轨）
 python tools/check_layout.py
+python tools/check_pipeline.py
 
 # 8. G4：质量规则可执行（覆盖空值/重复/单调性、全部单条只读 SQL）
 python tools/check_dq.py requirements/画像标签需求20261122/需求开发员/质量/dq_rules.json
@@ -150,7 +151,7 @@ python tools/chat.py task --role developer-1 --req 画像标签需求20261122 --
 python tools/chat.py serve --port 8765                     # 同契约的本地 HTTP（POST /v1/chat 等四端点）
 ```
 
-十五个校验器（另有问答沉淀与候选转正两条链路） + 需求雷达 + 调度执行器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
+十六个校验器（另有问答沉淀与候选转正两条链路） + 需求雷达 + 调度执行器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
 
 推送通道的原理、失败排查表、新窗口冷启动清单，见 [`docs/推送流程.md`](docs/推送流程.md)。
 角色怎么被 subagent 真跑，见 [`docs/角色运行.md`](docs/角色运行.md)；

@@ -51,10 +51,12 @@ lane_b:
     type: auto
     hitl: H2 方案裁决评审
     checks:
+      - 监督者只在两轨都交付完成后开始（P3 depends_on P2；此前 G2 必须已通过）
       - comparison.md 覆盖两轨全部差异（漏报一个差异即失败）
       - 每条裁决都带依据引用（本体 id 或知识库条目），不接受"我觉得"
       - final/ 全部脚本通过 sk-sql-guard
       - final/ 中与所选轨道不一致的改动，已逐条写进对比报告
+    check: python tools/check_dual_track.py --req requirements/<需求目录>
     on_fail: 退回 P3 重新比对；口径冲突则退回 P1
 
   - id: G4
