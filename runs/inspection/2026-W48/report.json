@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-11-28T10:25:50+08:00",
+  "generated_at": "2026-11-28T10:29:38+08:00",
   "week": "2026-W48",
   "summary": {
-    "checks_total": 11,
-    "checks_passed": 11,
+    "checks_total": 12,
+    "checks_passed": 12,
     "score": 87,
     "block": 0
   },
@@ -13,6 +13,16 @@
       "group": "门禁",
       "cmd": [
         "./ontology/schema/validate.py"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
+      "name": "角色定义",
+      "group": "门禁",
+      "cmd": [
+        "./tools/check_agents.py"
       ],
       "optional": false,
       "ok": true,

@@ -1,0 +1,10 @@
+{
+  "task": "inspect-weekly",
+  "ts": "2026-11-28T10:28:45+08:00",
+  "command": "python tools/inspect.py",
+  "exit": 0,
+  "ok": true,
+  "duration_s": 1.2,
+  "stdout_tail": "巡检 2026-W48　健康分 87　门禁 11/11　阻断 0\n  [anomaly] 画像标签需求20261122: G5 未过但 G6 已过（门禁顺序倒挂）\n  [hitl] 画像标签需求20261122 · G5: 未过门，需 H3 上线放行（已挂 5 天）\n  [gap] 技能: 11 个技能被工作流引用但未实现: sk-ont-validate, sk-sql-dml, sk-sql-guard, sk-sql-diff, sk-dq-gen, sk-lin-build, sk-doc-assemble, sk-qry-intent, sk-qry-locate, sk-qry-gen, sk-qry-check\n  [gap] 契约: 缺 5 个设计契约: intent, analysis, requirement, model_design, metric_spec\n  [gap] 知识索引: 1 个知识文件没有 chunk 索引\n报告: runs/inspection/2026-W48/report.md",
+  "stderr_tail": ""
+}

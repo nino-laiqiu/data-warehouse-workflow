@@ -30,3 +30,7 @@ dsh-plugins/
 # 需求雷达的运行时状态（每个人本地各算各的，不入库）
 需求池/_scan_state.json
 需求池/_待确认.md
+
+# 调度执行记录（与巡检报告一样，是趋势基线）
+!runs/schedule/
+!runs/schedule/**

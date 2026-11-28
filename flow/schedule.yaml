@@ -1,0 +1,53 @@
+# 定时任务的唯一权威定义。谁想加一条定时任务，改这里，不改调度器。
+#
+# cron 用标准 5 段（分 时 日 月 周），周字段 0=周日。
+# 载体怎么接：docs/调度.md（Windows 任务计划程序 / cron / DSH 定时三条路）。
+#
+# 执行器：python tools/run_schedule.py --due     # 只跑"现在该跑"的
+#         python tools/run_schedule.py --all     # 全跑一遍（手动体检）
+#         python tools/run_schedule.py --list    # 看清单与上次结果
+
+version: 1
+timezone: Asia/Shanghai
+
+tasks:
+  - id: radar-daily
+    name: 需求雷达（扫需求池）
+    cron: "0 9 * * *"
+    command: python tools/scan_requirements.py
+    ok_exit: [0, 2]        # 2 = 发现新需求，这是"有结果"，不是失败
+    output: 需求池/_待确认.md
+    owner: 需求负责人
+    description: 发现新增/改过的需求文档，写待确认清单；人不确认不进流程。
+    on_result: 有新需求时看 需求池/_待确认.md，勾选要不要开发
+
+  - id: inspect-weekly
+    name: 全仓巡检
+    cron: "0 9 * * 1"
+    command: python tools/inspect.py
+    ok_exit: [0]
+    output: runs/inspection/<ISO周>/report.md
+    owner: 数仓负责人
+    description: 11 项门禁 + 五组指标 + 健康分，只读、只出报告，不改任何文件。
+    on_result: 有 FAIL 或 anomaly 就排期修；健康分与上周对比
+
+  - id: wiki-lint
+    name: wiki 链接体检
+    cron: "30 9 * * 1"
+    command: python tools/check_wiki.py
+    ok_exit: [0]
+    output: （标准输出）
+    owner: 知识库维护者
+    description: 改完 wiki 必跑；断了链接说明有人搬了文件没改引用。
+    on_result: 断了就修链接，或者补 301 式的说明
+
+  - id: memory-review
+    name: 记忆晋升（周五）
+    cron: "0 17 * * 5"
+    command: python tools/inspect.py --json
+    ok_exit: [0]
+    output: memory/reviews/<ISO周>.md
+    owner: 数仓负责人
+    description: 从本周 journal 里挑候选晋升项（manual：需要人写 memory/reviews/<周>.md）。
+    status: manual
+    on_result: 按 memory/README.md 的模板写本周小结与晋升候选

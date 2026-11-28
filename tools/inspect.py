@@ -77,6 +77,7 @@ def build_checks() -> list[dict]:
         checks.append({"name": name, "group": group, "cmd": cmd, "optional": optional})
 
     add("本体校验", "门禁", py("ontology", "schema", "validate.py"))
+    add("角色定义", "门禁", py("tools", "check_agents.py"))
     add("目录布局", "门禁", py("tools", "check_layout.py"))
     add("技能引用", "门禁", py("tools", "check_skills.py"))
     add("知识链接", "门禁", py("tools", "check_wiki.py"))

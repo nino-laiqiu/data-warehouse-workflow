@@ -100,27 +100,41 @@ python tools/inspect.py
 
 # 12. 需求雷达：扫 需求池/ 有没有新增或改过的需求文档（有则退出码 2）
 python tools/scan_requirements.py
+
+# 13. 校验角色定义：11 个角色的分工、双轨隔离、pipeline 接线是否自洽
+python tools/check_agents.py
+
+# 14. 生成某个角色的 subagent 提示词（--write 同时落盘为派活证据）
+python tools/role_prompt.py --role developer-1 --req 画像标签需求20261122 --write
+
+# 15. 定时任务：看清单 / 跑此刻到点的 / 全跑一遍
+python tools/run_schedule.py --list
+python tools/run_schedule.py --due
 ```
 
-十一个校验器 + 一个需求雷达都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
+十三个校验器 + 需求雷达 + 调度执行器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
 
 推送通道的原理、失败排查表、新窗口冷启动清单，见 [`docs/推送流程.md`](docs/推送流程.md)。
+角色怎么被 subagent 真跑，见 [`docs/角色运行.md`](docs/角色运行.md)；定时怎么接，见 [`docs/调度.md`](docs/调度.md)。
 七个核心能力（多智能体协作 / 知识库驱动 / 需求自动化 / 全过程留痕 / 记忆体系 / 开发规范 / 定时巡检）的定义与缺口，见 [`docs/核心能力与自动化.md`](docs/核心能力与自动化.md)。
 
 ## 当前状态
 
-**v0.6 —— 需求优先的目录结构；一个需求从 P0 跑到 P6，电商域端到端闭环。**
+**v0.7 —— 需求优先的目录结构；一个需求从 P0 跑到 P6；角色由 subagent 真跑，定时在外面套一层。**
 
 | 阶段 | 产出 | 状态 |
 |---|---|---|
 | M0 设计定稿 | [`docs/设计文档-数仓智能开发工作流.md`](docs/设计文档-数仓智能开发工作流.md) | 待评审 |
 | M1 骨架 | 目录 + 校验器 + 一份示例 skill/agent | ✅ |
-| M1 本体 + 知识库 | `ontology/` `knowledge/` 填内容 | ✅ 14 个本体文件 + 6 页 wiki |
+| M1 本体 + 知识库 | `ontology/` `knowledge/` 填内容 | ✅ 17 个本体文件 + 6 页 wiki |
 | M2 角色与流程 | `requirements/` `agents/`(11 角色) `flow/`(P0–P6 / G0–G6) | ✅ 本版（双轨制） |
 | M2a A 线最小闭环 | `skills/sk-qry-*` | 未开始 |
 | M2b B 线 Skills | `skills/sk-req-*` `sk-sql-*` `sk-ont-validate` | 部分（已实现 sk-req-register / sk-req-validate / sk-sql-ddl） |
-| M3 契约落地 | `contracts/` 9 个 schema | 部分（模板 + 4 个：comparison_report / journal_entry / dq_rules / lineage） |
+| M3 契约落地 | `contracts/` 9 个 schema | 部分（模板 + 5 个：comparison_report / journal_entry / dq_rules / lineage / ontology_delta） |
 | M4 电商域闭环 | `requirements/画像标签需求20261122/需求开发员/` | ✅ P0–P6 全跑通（REQ-20261122-02，H3 待人工放行） |
+| M5 巡检器 | `tools/inspect.py` 一条命令出门禁矩阵 + 周报 | ✅ 12 项门禁，首份周报 `runs/inspection/2026-W48/` |
+| M5b 运行载体 | 角色 → subagent 提示词（`agents/roles.json` + `tools/role_prompt.py`） | ✅ |
+| M5c 调度载体 | `flow/schedule.yaml` + `tools/run_schedule.py`（cron / 任务计划程序 / DSH 定时都调它） | ✅ |
 
 先读设计文档第 7 章（两条流水线）。注意：第 9 章的端到端走查是用 Push 域写的（比电商复杂），
 本仓库的模板实现换成**电商交易域**——结构一样，但更适合当起点。
