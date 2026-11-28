@@ -14,6 +14,7 @@ WITH dim_user AS (
            ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY start_date DESC) AS rn
     FROM dim_user_df
     WHERE dt = '${dt}'
+      AND is_test = 0
   ) t
   WHERE rn = 1
 ),
@@ -22,7 +23,6 @@ pay_all AS (
   FROM dwd_pay_flow_di
   WHERE dt <= date_sub('${dt}', 1)
     AND pay_amt > 0
-    AND user_id NOT LIKE 'test\_%'
 ),
 pay_30d AS (
   SELECT user_id,
@@ -46,19 +46,18 @@ pref_cat AS (
     SELECT i.user_id, i.category_name,
            ROW_NUMBER() OVER (
              PARTITION BY i.user_id
-             ORDER BY i.cat_gmv DESC, i.first_dt ASC, i.category_name ASC
+             ORDER BY i.cat_gmv DESC, i.cate_l1_id ASC
            ) AS rn
     FROM (
-      SELECT o.user_id, p.category_name,
-             SUM(oi.item_amt) AS cat_gmv,
-             MIN(oi.dt)       AS first_dt
+      SELECT o.user_id, p.category_name, p.cate_l1_id,
+             SUM(oi.item_amt) AS cat_gmv
       FROM dwd_order_item_di oi
       JOIN dwd_order_main_di o
         ON oi.order_id = o.order_id AND o.dt = oi.dt
        AND o.order_status IN ('paid', 'shipped', 'completed')
       JOIN dim_product_df p ON p.sku_id = oi.sku_id AND p.dt = '${dt}'
-      WHERE oi.dt BETWEEN date_sub('${dt}', 90) AND date_sub('${dt}', 1)
-      GROUP BY o.user_id, p.category_name
+      WHERE oi.dt BETWEEN date_sub('${dt}', 30) AND date_sub('${dt}', 1)
+      GROUP BY o.user_id, p.category_name, p.cate_l1_id
     ) i
   ) x
   WHERE rn = 1
@@ -88,6 +87,7 @@ SELECT
   gender                                                       AS basic_gender,
   CASE
     WHEN birthday IS NULL THEN 'UNKNOWN'
+    WHEN CAST(DATEDIFF('${dt}', birthday) / 365 AS INT) < 18 THEN '<18'
     WHEN CAST(DATEDIFF('${dt}', birthday) / 365 AS INT) BETWEEN 18 AND 24 THEN '18-24'
     WHEN CAST(DATEDIFF('${dt}', birthday) / 365 AS INT) BETWEEN 25 AND 34 THEN '25-34'
     WHEN CAST(DATEDIFF('${dt}', birthday) / 365 AS INT) BETWEEN 35 AND 44 THEN '35-44'
@@ -106,10 +106,10 @@ SELECT
   member_level                                                 AS basic_member_level,
   CASE
     WHEN first_pay_time IS NULL THEN '未购'
-    WHEN DATEDIFF('${dt}', first_pay_time) <= 30  THEN '0-30'
+    WHEN DATEDIFF('${dt}', first_pay_time) <= 7   THEN '0-7'
+    WHEN DATEDIFF('${dt}', first_pay_time) <= 30  THEN '8-30'
     WHEN DATEDIFF('${dt}', first_pay_time) <= 90  THEN '31-90'
-    WHEN DATEDIFF('${dt}', first_pay_time) <= 180 THEN '91-180'
-    ELSE '180+'
+    ELSE '90+'
   END                                                          AS purchase_first_order_days,
   CASE
     WHEN order_cnt_30d = 0  THEN '0'
@@ -121,10 +121,11 @@ SELECT
   CAST(gmv_30d AS DECIMAL(18, 2))                              AS purchase_gmv_30d,
   CASE
     WHEN order_cnt_30d = 0                       THEN '未购'
-    WHEN gmv_30d / order_cnt_30d <= 50           THEN '0-50'
-    WHEN gmv_30d / order_cnt_30d <= 100          THEN '50-100'
-    WHEN gmv_30d / order_cnt_30d <= 300          THEN '100-300'
-    ELSE '300+'
+    WHEN gmv_30d / order_cnt_30d < 50            THEN '<50'
+    WHEN gmv_30d / order_cnt_30d < 100           THEN '50-100'
+    WHEN gmv_30d / order_cnt_30d < 300           THEN '100-300'
+    WHEN gmv_30d / order_cnt_30d < 1000          THEN '300-1000'
+    ELSE '1000+'
   END                                                          AS purchase_aov_band,
   CASE
     WHEN last_pay_time IS NULL THEN '未购'

@@ -21,7 +21,7 @@ SELECT COUNT(1) FROM dws_user_profile_df WHERE dt = '${dt}' AND (user_id IS NULL
 -- 期望：返回 0
 -- 说明：值域必须与 dim_tag_df.tag_value 一致；两处不一致会导致圈人条件查不出人
 -- 失败动作：阻断下游
-SELECT COUNT(1) FROM dws_user_profile_df WHERE dt = '${dt}' AND (basic_gender NOT IN ('男','女','UNKNOWN') OR basic_age_band NOT IN ('18-24','25-34','35-44','45+','UNKNOWN') OR basic_city_level NOT IN ('1线','2线','3线','4线及以下','UNKNOWN') OR basic_register_days NOT IN ('0-7','8-30','31-90','91-365','365+') OR basic_member_level NOT IN ('V0','V1','V2','V3','UNKNOWN') OR purchase_first_order_days NOT IN ('未购','0-30','31-90','91-180','180+') OR purchase_order_cnt_30d NOT IN ('0','1','2-3','4-9','10+') OR purchase_aov_band NOT IN ('0-50','50-100','100-300','300+','未购') OR purchase_last_pay_days NOT IN ('0-7','8-30','31-90','90+','未购') OR purchase_is_repurchase NOT IN ('是','否','未购'));
+SELECT COUNT(1) FROM dws_user_profile_df WHERE dt = '${dt}' AND (basic_gender NOT IN ('男','女','UNKNOWN') OR basic_age_band NOT IN ('<18','18-24','25-34','35-44','45+','UNKNOWN') OR basic_city_level NOT IN ('1线','2线','3线','4线及以下','UNKNOWN') OR basic_register_days NOT IN ('0-7','8-30','31-90','91-365','365+') OR basic_member_level NOT IN ('V0','V1','V2','V3','UNKNOWN') OR purchase_first_order_days NOT IN ('未购','0-7','8-30','31-90','90+') OR purchase_order_cnt_30d NOT IN ('0','1','2-3','4-9','10+') OR purchase_aov_band NOT IN ('未购','<50','50-100','100-300','300-1000','1000+') OR purchase_last_pay_days NOT IN ('0-7','8-30','31-90','90+','未购') OR purchase_is_repurchase NOT IN ('是','否','未购'));
 
 -- DQ-004 GMV 非负 [range/block]
 -- 期望：返回 0
@@ -63,7 +63,7 @@ SELECT col, ratio FROM (SELECT 'basic_gender' AS col, SUM(CASE WHEN basic_gender
 -- 期望：返回 0
 -- 说明：首单时间写死不变，距今天数必然单调变大；回退说明 pay_all 的 scan 范围被悄悄改了
 -- 失败动作：阻断下游
-SELECT COUNT(1) FROM (SELECT a.user_id, CASE a.purchase_first_order_days WHEN '0-30' THEN 1 WHEN '31-90' THEN 2 WHEN '91-180' THEN 3 ELSE 4 END AS cur_r, CASE b.purchase_first_order_days WHEN '0-30' THEN 1 WHEN '31-90' THEN 2 WHEN '91-180' THEN 3 ELSE 4 END AS prev_r FROM (SELECT user_id, purchase_first_order_days FROM dws_user_profile_df WHERE dt = '${dt}') a JOIN (SELECT user_id, purchase_first_order_days FROM dws_user_profile_df WHERE dt = date_sub('${dt}', 1)) b ON a.user_id = b.user_id WHERE a.purchase_first_order_days <> '未购' AND b.purchase_first_order_days <> '未购') t WHERE cur_r < prev_r;
+SELECT COUNT(1) FROM (SELECT a.user_id, CASE a.purchase_first_order_days WHEN '0-7' THEN 1 WHEN '8-30' THEN 2 WHEN '31-90' THEN 3 ELSE 4 END AS cur_r, CASE b.purchase_first_order_days WHEN '0-7' THEN 1 WHEN '8-30' THEN 2 WHEN '31-90' THEN 3 ELSE 4 END AS prev_r FROM (SELECT user_id, purchase_first_order_days FROM dws_user_profile_df WHERE dt = '${dt}') a JOIN (SELECT user_id, purchase_first_order_days FROM dws_user_profile_df WHERE dt = date_sub('${dt}', 1)) b ON a.user_id = b.user_id WHERE a.purchase_first_order_days <> '未购' AND b.purchase_first_order_days <> '未购') t WHERE cur_r < prev_r;
 
 -- DQ-011 重跑指纹一致 [volume/block]
 -- 期望：重跑两次指纹一致

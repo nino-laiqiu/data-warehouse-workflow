@@ -113,3 +113,10 @@ lane_a:
 waivers:
   file: memory/rulings/waivers.json
   required_fields: [gate, run_id, reason, approved_by, expires_at]
+
+  # 定稿口径变更后（P3 之后又改了需求稿），必须补一次产物对齐复核，
+  # 否则"需求改了、SQL 还是旧的"没人会发现。复核记录放 监督者/复核/。
+  G3_recheck:
+    when: 需求稿在 G1 通过后被再次确认（req_review confirm 覆盖了旧基线）
+    need: 监督者/复核/<REQ>-口径对齐.md，逐条列出 一致 / 已改 / 保留偏差
+    fail_if: 有偏差但既没改、也没写进交付文档
