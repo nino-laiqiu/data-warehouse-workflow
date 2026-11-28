@@ -3,9 +3,10 @@
 
 查的是"角色定义"这一层，不是角色写得对不对：
   1. 结构：必填字段、id 规范、id 不重复、tools 取自词表、stages 取自 P0–P6 / A1–A6 / ALL
-  2. 分工：只有 ontology-admin 能写 ontology/；developer-1 与 developer-2 必须互设 must_not_read
+  2. 分工：任何角色都不能直接写 ontology/（只有人能改）；developer-1 与 developer-2 必须互设 must_not_read
   3. 接线：pipeline 里出现的 agent 必须在 roles.json 里；每个 stage 必须有人负责（ALL 不算）
   4. 门禁：role.gate 必须在 gates.yaml 里真的存在
+  5. 编制：当前约定 5 个角色（需求分析员 / 开发者1 / 开发者2 / 监督者 / 追踪者），见 memory/decisions/ADR-0003-five-agents.md
 
 退出码：0 通过；1 有错误。
 """
@@ -60,10 +61,14 @@ def main() -> int:
         if not r.get("writes"):
             errors.append(f"{rid}: writes 为空——角色必须有写入边界（只读角色写 [] 并说明）")
 
-    # 分工：本体写入独占
+    # 分工：本体谁都不能自动写（只有人能改，改前要走 ontology_delta 提案）
     ontology_writers = [r["id"] for r in roles if any("ontology/" in w for w in r.get("writes", []))]
-    if ontology_writers != ["ontology-admin"]:
-        errors.append(f"能写 ontology/ 的角色必须只有 ontology-admin，当前是 {ontology_writers}")
+    if ontology_writers:
+        errors.append(f"任何角色都不得直接写 ontology/（只有人能改），违规角色：{ontology_writers}")
+
+    # 编制：5 个角色（改编制先改 memory/decisions/ADR-0003-five-agents.md 与这条检查）
+    if len(roles) != 5:
+        errors.append(f"角色编制应为 5 个，当前 {len(roles)} 个：{[r['id'] for r in roles]}")
 
     # 分工：双轨隔离必须双向
     for a, b in (("developer-1", "developer-2"), ("developer-2", "developer-1")):
@@ -97,11 +102,14 @@ def main() -> int:
     covered = {}
     for r in roles:
         for st in r.get("stages", []):
-            if st != "ALL":
+            if st == "ALL":
+                for s in ["P0", "P1", "P2", "P3", "P4", "P5", "P6", "A1", "A2", "A3", "A4", "A5", "A6"]:
+                    covered.setdefault(s, []).append(r["id"])
+            else:
                 covered.setdefault(st, []).append(r["id"])
     for st in ["P0", "P1", "P2", "P3", "P4", "P5", "P6"]:
         if st not in covered:
-            warns.append(f"stage {st} 没有常驻角色（可能由 orchestrator 兼任）")
+            warns.append(f"stage {st} 没有常驻角色（可在 pipeline 里标「无（skill 直调）」）")
 
     # 门禁存在性
     gates_text = GATES.read_text(encoding="utf-8") if GATES.exists() else ""

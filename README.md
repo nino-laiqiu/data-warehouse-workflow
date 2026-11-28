@@ -30,7 +30,9 @@
 一个人写一个人自检，发现不了"口径理解偏差"——两份 SQL 都能跑，数字差 3%，谁也不知道谁对。
 双轨的代价是成本 ×2，所以只用在建表和指标口径这类一次做错、长期返工的事上。
 
-追踪者（`chronicler`）横切全程，把每次对话、每次修改、每次门禁判定写进 `requirements/<需求目录>/需求开发员/journal.jsonl`。
+追踪者（`chronicler`）横切全程，把每次对话、每次修改、每次门禁判定写进 `requirements/<需求目录>/需求开发员/journal.jsonl`；P6 的交付文档也由它汇总。
+
+**编制 5 个角色**：需求分析员（P0/P1/P4）、开发者 1（P2/P5）、开发者 2（P2）、监督者（P3）、追踪者（全程 + P6）。为什么不设编排者/质量官/血缘负责人/文档负责人——见 [ADR-0003](memory/decisions/ADR-0003-five-agents.md)。
 
 ## 目录地图
 
@@ -101,7 +103,7 @@ python tools/inspect.py
 # 12. 需求雷达：扫 需求池/ 有没有新增或改过的需求文档（有则退出码 2）
 python tools/scan_requirements.py
 
-# 13. 校验角色定义：11 个角色的分工、双轨隔离、pipeline 接线是否自洽
+# 13. 校验角色定义：5 个角色的分工、双轨隔离、pipeline 接线、编制是否仍是 5 个
 python tools/check_agents.py
 
 # 14. 生成某个角色的 subagent 提示词（--write 同时落盘为派活证据）
@@ -131,7 +133,7 @@ python tools/wiki_impact.py --stamp --note "补了退款回冲说明"
 | M0 设计定稿 | [`docs/设计文档-数仓智能开发工作流.md`](docs/设计文档-数仓智能开发工作流.md) | 待评审 |
 | M1 骨架 | 目录 + 校验器 + 一份示例 skill/agent | ✅ |
 | M1 本体 + 知识库 | `ontology/` `knowledge/` 填内容 | ✅ 17 个本体文件 + 6 页 wiki |
-| M2 角色与流程 | `requirements/` `agents/`(11 角色) `flow/`(P0–P6 / G0–G6) | ✅ 本版（双轨制） |
+| M2 角色与流程 | `requirements/` `agents/`(5 角色) `flow/`(P0–P6 / G0–G6) | ✅ 本版（双轨制） |
 | M2a A 线最小闭环 | `skills/sk-qry-*` | 未开始 |
 | M2b B 线 Skills | `skills/sk-req-*` `sk-sql-*` `sk-ont-validate` | 部分（已实现 sk-req-register / sk-req-validate / sk-sql-ddl） |
 | M3 契约落地 | `contracts/` 9 个 schema | 部分（模板 + 5 个：comparison_report / journal_entry / dq_rules / lineage / ontology_delta） |

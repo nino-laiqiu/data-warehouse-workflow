@@ -1,6 +1,6 @@
 {
-  "$comment": "B/A 线角色的机器可读定义。散文说明在 agents/<id>.md；这里只放能被脚本检查的部分。DSH subagent 运行时用 tools/role_prompt.py 生成它的提示词。",
-  "version": 1,
+  "$comment": "B/A 线角色的机器可读定义。编制 = 5 个：需求分析员、开发者1/2、监督者、追踪者（决定见 memory/decisions/ADR-0003-five-agents.md）。散文说明在 agents/<id>.md；DSH subagent 运行时用 tools/role_prompt.py 生成提示词。",
+  "version": 2,
   "placeholders": {
     "<需求目录>": "requirements/<短名>需求<YYYYMMDD>",
     "<run>": "requirements/<短名>需求<YYYYMMDD>/需求开发员"
@@ -8,50 +8,43 @@
   "tools": ["read", "write", "edit", "glob", "grep", "pwsh", "subagent"],
   "roles": [
     {
-      "id": "orchestrator",
-      "name": "编排者",
-      "stages": ["ALL"],
-      "gate": null,
-      "gate_reason": "它是验门的人，不产出门禁产物",
-      "tools": ["read", "glob", "grep", "pwsh", "subagent"],
-      "writes": ["requirements/_registry.jsonl", "<run>/journal.jsonl"],
-      "must_not_read": [],
-      "notes": "只派活、验门、记账；不许改契约字段名，不许自己动手写 SQL。"
-    },
-    {
       "id": "requirement-translator",
-      "name": "需求翻译者",
-      "stages": ["P1"],
+      "name": "需求分析员",
+      "stages": ["P0", "P1", "P4", "A5"],
       "gate": "G1",
       "tools": ["read", "write", "edit", "glob", "grep", "pwsh"],
-      "writes": ["<需求目录>/需求分析员/**"],
+      "writes": ["<需求目录>/需求分析员/**", "<run>/质量/**"],
       "must_not_read": ["<run>/developer-1/**", "<run>/developer-2/**"],
       "inputs": ["<需求目录>/反馈者/REQ-*.md", "ontology/**", "knowledge/wiki/**"],
-      "outputs": ["<需求目录>/需求分析员/REQ-*-translation.md", "<run>/本体变更/ontology_delta.json"],
-      "notes": "消灭歧义；业务名词三种结局：命中本体 / 提 ontology_delta / 进待确认项。待确认项非空不许进 P2。"
-    },
-    {
-      "id": "chronicler",
-      "name": "追踪者",
-      "stages": ["ALL"],
-      "gate": null,
-      "gate_reason": "横切角色，记录别人的门禁结果",
-      "tools": ["read", "write", "pwsh"],
-      "writes": ["<run>/journal.jsonl"],
-      "must_not_read": [],
-      "notes": "只追加、不存原文只存摘要+引用、不参与决策；产物由谁生成谁记账。"
+      "outputs": [
+        "<需求目录>/需求分析员/REQ-*-translation.md",
+        "<run>/本体变更/ontology_delta.json",
+        "<run>/质量/dq_rules.json"
+      ],
+      "notes": "三段职责：① 收需求并登记（P0/G0）；② 翻译成可开工规格（P1/G1），业务名词三种结局=命中本体/提 delta/进待确认项，待确认项非空不许进 P2；③ 把验收标准变成可执行的质量规则（P4/G4）。另兼 A 线结论生成（A5）。不写 SQL 产物，不裁决方案。"
     },
     {
       "id": "developer-1",
       "name": "开发者 1",
-      "stages": ["P2"],
+      "stages": ["P2", "P5"],
       "gate": "G2",
       "tools": ["read", "write", "edit", "glob", "grep", "pwsh"],
-      "writes": ["<run>/developer-1/**"],
+      "writes": ["<run>/developer-1/**", "<run>/血缘/**"],
       "must_not_read": ["<run>/developer-2/**"],
-      "inputs": ["<需求目录>/需求分析员/REQ-*-translation.md", "ontology/**", "knowledge/wiki/**"],
-      "outputs": ["<run>/developer-1/sql/*.sql", "<run>/developer-1/design-notes.md", "<run>/developer-1/self-check.md"],
-      "notes": "与 developer-2 并行且互不可见；看不见对方才有多样性。"
+      "inputs": [
+        "<需求目录>/需求分析员/REQ-*-translation.md",
+        "<run>/监督者/final/*.sql",
+        "ontology/**",
+        "knowledge/wiki/**"
+      ],
+      "outputs": [
+        "<run>/developer-1/sql/*.sql",
+        "<run>/developer-1/design-notes.md",
+        "<run>/developer-1/self-check.md",
+        "<run>/血缘/lineage.json",
+        "<run>/血缘/dag_*.py"
+      ],
+      "notes": "P2 双轨之一，与 developer-2 并行且互不可见（看得见就会趋同，比对失去信息量）。P3 裁决后隔离解除，由它落地血缘与调度（P5/G5）——同一个实现者接手自己的最终脚本，比第三人重新读一遍更省事。"
     },
     {
       "id": "developer-2",
@@ -62,8 +55,12 @@
       "writes": ["<run>/developer-2/**"],
       "must_not_read": ["<run>/developer-1/**"],
       "inputs": ["<需求目录>/需求分析员/REQ-*-translation.md", "ontology/**", "knowledge/wiki/**"],
-      "outputs": ["<run>/developer-2/sql/*.sql", "<run>/developer-2/design-notes.md", "<run>/developer-2/self-check.md"],
-      "notes": "与 developer-1 并行且互不可见；两轨 SQL 的 sha256 必须不同，否则 G2 判失败。"
+      "outputs": [
+        "<run>/developer-2/sql/*.sql",
+        "<run>/developer-2/design-notes.md",
+        "<run>/developer-2/self-check.md"
+      ],
+      "notes": "P2 双轨之一，与 developer-1 并行且互不可见。两轨 SQL 的 sha256 必须不同，否则 G2 判失败（说明其中一轨在抄）。P3 之后退场，不再参与落地。"
     },
     {
       "id": "supervisor",
@@ -73,70 +70,37 @@
       "tools": ["read", "write", "edit", "glob", "grep", "pwsh"],
       "writes": ["<run>/监督者/**"],
       "must_not_read": [],
-      "inputs": ["<run>/developer-1/**", "<run>/developer-2/**", "<需求目录>/需求分析员/REQ-*-translation.md", "ontology/**"],
-      "outputs": ["<run>/监督者/comparison.md", "<run>/监督者/verdict.md", "<run>/监督者/comparison_report.json", "<run>/监督者/final/*.sql"],
-      "notes": "三层比较：口径→结构→实现；禁止改口径（冲突退回 P1）、禁止和稀泥、禁止重写（只做选择与最小修补）。"
+      "inputs": [
+        "<run>/developer-1/**",
+        "<run>/developer-2/**",
+        "<需求目录>/需求分析员/REQ-*-translation.md",
+        "ontology/**"
+      ],
+      "outputs": [
+        "<run>/监督者/comparison.md",
+        "<run>/监督者/verdict.md",
+        "<run>/监督者/comparison_report.json",
+        "<run>/监督者/final/*.sql"
+      ],
+      "notes": "三层比较：口径→结构→实现。禁止改口径（冲突退回 P1）、禁止和稀泥（「两版都好」不是结论）、禁止重写（只做选择与最小修补，改动逐条记账）。"
     },
     {
-      "id": "ontology-admin",
-      "name": "本体管理员",
+      "id": "chronicler",
+      "name": "追踪者",
       "stages": ["ALL"],
       "gate": null,
-      "gate_reason": "它的产物是本体，不是门禁产物；由 G1 校验引用真实性",
-      "tools": ["read", "write", "edit", "glob", "grep", "pwsh"],
-      "writes": ["ontology/**", "memory/decisions/**"],
-      "must_not_read": [],
-      "inputs": ["<run>/本体变更/ontology_delta.json", "contracts/ontology_delta.schema.json"],
-      "outputs": ["ontology/{dict,object,process,metric,link,constraint}/*.yaml", "memory/decisions/ADR-*.md"],
-      "notes": "唯一能写 ontology/ 的角色；只接受评审通过的 delta，不接受口头口径。"
-    },
-    {
-      "id": "quality-officer",
-      "name": "质量官",
-      "stages": ["P4"],
-      "gate": "G4",
-      "tools": ["read", "write", "edit", "glob", "grep", "pwsh"],
-      "writes": ["<run>/质量/**"],
-      "must_not_read": [],
-      "inputs": ["<run>/监督者/final/*.sql", "ontology/metric/**", "knowledge/wiki/02-度量与指标.md"],
-      "outputs": ["<run>/质量/dq_rules.json", "<run>/质量/dq_check.sql"],
-      "notes": "规则必须可执行、可机器判定；dq_check.sql 由 dq_to_sql.py 生成，不手写。"
-    },
-    {
-      "id": "lineage-steward",
-      "name": "血缘与调度负责人",
-      "stages": ["P5"],
-      "gate": "G5",
-      "tools": ["read", "write", "edit", "glob", "grep", "pwsh"],
-      "writes": ["<run>/血缘/**"],
-      "must_not_read": [],
-      "inputs": ["<run>/监督者/final/*.sql", "<run>/质量/dq_rules.json"],
-      "outputs": ["<run>/血缘/lineage.json", "<run>/血缘/dag_*.py"],
-      "notes": "不许有孤立节点、调度不许成环、回滚必须能执行；上线放行（H3）由人签。"
-    },
-    {
-      "id": "doc-writer",
-      "name": "交付文档负责人",
-      "stages": ["P6"],
-      "gate": "G6",
-      "tools": ["read", "write", "edit", "glob", "grep", "pwsh"],
-      "writes": ["<run>/交付/**"],
-      "must_not_read": [],
-      "inputs": ["<run>/监督者/final/*.sql", "<run>/质量/dq_rules.json", "<run>/血缘/lineage.json", "<需求目录>/需求分析员/REQ-*-translation.md"],
-      "outputs": ["<run>/交付/README.md", "<run>/交付/上线单.md", "<run>/交付/口径变更说明.md"],
-      "notes": "必须逐条写出与需求原文的偏差；写不出偏差说明没读懂需求。"
-    },
-    {
-      "id": "analyst-writer",
-      "name": "取数分析者",
-      "stages": ["A1", "A2", "A3", "A4", "A5", "A6"],
-      "gate": "GA1",
+      "gate_reason": "横切角色，记录别人的门禁结果，自己产不出门禁产物",
       "tools": ["read", "write", "glob", "grep", "pwsh"],
-      "writes": ["runs/<run_id>/**"],
-      "must_not_read": ["requirements/<需求目录>/需求开发员/**"],
-      "inputs": ["ontology/**", "knowledge/wiki/**"],
-      "outputs": ["runs/<run_id>/answer.md", "runs/<run_id>/query.sql", "runs/<run_id>/promotion.md"],
-      "notes": "只读 SQL（SELECT/WITH），必须带 dt 分区且 ≤90 天，LIMIT 2000，禁止 SELECT *，JOIN ≤3；产物永不进生产调度。"
+      "writes": ["<run>/journal.jsonl", "<run>/交付/**"],
+      "must_not_read": [],
+      "inputs": ["<run>/**", "<需求目录>/需求分析员/REQ-*-translation.md"],
+      "outputs": [
+        "<run>/journal.jsonl",
+        "<run>/交付/README.md",
+        "<run>/交付/上线单.md",
+        "<run>/交付/口径变更说明.md"
+      ],
+      "notes": "四件事：① 每个 stage 前后、每次产物变更、每次门禁判定都记一条（只追加、不存原文只存摘要+引用）；② 不参与任何决策；③ P6 交付文档由它汇总——素材是 journal + final SQL + 翻译稿，数据字典和上线单本来就是「记录」的产物；④ 与需求原文的偏差由需求分析员给出，它只负责如实写进去、不改口径。"
     }
   ]
 }

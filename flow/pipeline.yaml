@@ -17,7 +17,7 @@ lane_b_develop:
   stages:
     - id: P0
       name: 需求入库
-      agent: orchestrator（登记，人不经 AI 投放原件）
+      agent: requirement-translator（收需求 + 登记，人只负责把原件放进 反馈者/）
       skills: [sk-req-register]
       in: 原始需求（群/邮件/会议/工单）
       out: requirements/<需求目录>/反馈者/REQ-*.md + sha256 登记
@@ -49,7 +49,7 @@ lane_b_develop:
 
     - id: P4
       name: 质量规则
-      agent: quality-officer
+      agent: requirement-translator   # 验收标准 → 可执行规则，仍属定义侧
       skills: [sk-dq-gen]
       in: final/ + metric_spec
       out: dq_rules
@@ -57,7 +57,7 @@ lane_b_develop:
 
     - id: P5
       name: 血缘与调度
-      agent: lineage-steward
+      agent: developer-1              # 裁决后隔离解除，由实现者自己落地调度
       skills: [sk-lin-build]
       in: final/ + dq_rules
       out: lineage + dag
@@ -65,7 +65,7 @@ lane_b_develop:
 
     - id: P6
       name: 文档交付
-      agent: doc-writer
+      agent: chronicler               # 交付文档 = 记录的产物，素材是 journal + final
       skills: [sk-doc-assemble]
       in: 以上全部
       out: 交付文档 + 口径变更说明
@@ -109,7 +109,7 @@ lane_a_analyze:
 
     - id: A5
       name: 结论生成
-      agent: analyst-writer
+      agent: requirement-translator   # A 线由需求分析员兼岗（取数分析的问句解析同一套）
       skills: []
       in: 查询结果 + 自检报告
       out: 结论（禁用因果表述）
@@ -117,7 +117,7 @@ lane_a_analyze:
 
     - id: A6
       name: 沉淀
-      agent: orchestrator
+      agent: chronicler
       skills: []
       in: 本次 run
       out: memory/ 提案或 knowledge/ 范例
