@@ -193,6 +193,31 @@ def knowledge_stats() -> dict:
     return {"files": len(md), "chunks": len(chunks), "uncovered": uncovered}
 
 
+
+def qa_stats() -> dict:
+    """问答沉淀挖出来的候选：待审积压是最容易烂掉的地方。"""
+    base = ROOT / "知识候选"
+    cands: list[dict] = []
+    for f in sorted(base.glob("*/candidates.jsonl")):
+        for ln in read(f).splitlines():
+            ln = ln.strip()
+            if ln:
+                try:
+                    cands.append(json.loads(ln))
+                except json.JSONDecodeError:
+                    pass
+    pending = [c for c in cands if c.get("status") == "pending"]
+    oldest_days = 0
+    if pending:
+        stamps = sorted(c.get("created_at", "") for c in pending if c.get("created_at"))
+        if stamps:
+            try:
+                d = datetime.strptime(stamps[0], "%Y%m%d")
+                oldest_days = (datetime.now() - d).days
+            except ValueError:
+                oldest_days = 0
+    return {"total": len(cands), "pending": len(pending), "oldest_days": oldest_days, "items": pending}
+
 def journal_stats() -> dict:
     rows = []
     for req in requirement_dirs():
@@ -274,6 +299,7 @@ def collect() -> dict:
     sk = skill_stats()
     ct = contract_stats()
     kn = knowledge_stats()
+    qa = qa_stats()
     jr = journal_stats()
     hy = hygiene_stats()
 
@@ -303,6 +329,9 @@ def collect() -> dict:
         problems.append({"level": "gap", "where": "契约", "detail": f"缺 {len(ct['missing'])} 个设计契约: " + ", ".join(ct["missing"])})
     if kn["uncovered"]:
         problems.append({"level": "gap", "where": "知识索引", "detail": f"{len(kn['uncovered'])} 个知识文件没有 chunk 索引"})
+    if qa["pending"]:
+        problems.append({"level": "gap", "where": "知识候选",
+                         "detail": f"{qa['pending']} 条候选待审（最老一条 {qa['oldest_days']} 天）：" + ", ".join(c["candidate_id"] for c in qa["items"][:4])})
     if hy["empty_dirs"]:
         problems.append({"level": "info", "where": "空目录", "detail": ", ".join(hy["empty_dirs"])})
 
