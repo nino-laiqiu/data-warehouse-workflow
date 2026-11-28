@@ -133,6 +133,10 @@ def cmd_ask(a: dict) -> int:
 
 
 def cmd_answer(a: dict) -> int:
+    st0 = load(a['--req-id'])
+    if st0.get('status') == 'confirmed':
+        print('已确认的需求不能直接改答案——先 reopen 回到复核态，改完再 confirm。', file=sys.stderr)
+        return 1
     req_id, qid, text = a["--req-id"], a["--id"], a["--text"]
     st = load(req_id)
     q = next((x for x in st["questions"] if x["id"] == qid), None)

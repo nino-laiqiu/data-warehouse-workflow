@@ -142,6 +142,12 @@ python tools/journal.py append --req 画像标签需求20261122 --type query --a
 python tools/journal.py todos --req 画像标签需求20261122
 python tools/journal.py check --req 画像标签需求20261122
 python tools/journal.py show  --req 画像标签需求20261122 --tail 10
+
+# 21. 对话界面（P1）：CLI 与本地 HTTP 共用一套契约，四个动作
+python tools/chat.py chat "近30天城市等级支付用户数"        # → SQL + caveats + 落一条 qa_record
+python tools/chat.py journal --run R-1 --type gate         # → 只看门禁事件
+python tools/chat.py task --role developer-1 --req 画像标签需求20261122 --stage P2
+python tools/chat.py serve --port 8765                     # 同契约的本地 HTTP（POST /v1/chat 等四端点）
 ```
 
 十五个校验器（另有问答沉淀与候选转正两条链路） + 需求雷达 + 调度执行器都不依赖第三方库（本机没有 PyYAML / jsonschema），失败时返回非 0 退出码与机器可读原因。
