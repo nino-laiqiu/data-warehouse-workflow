@@ -1,0 +1,35 @@
+{
+  "version": "1",
+  "source": "dsh-a-line",
+  "sent_at": "2026-11-28T10:54:00+08:00",
+  "records": [
+    {
+      "qa_id": "Q20261128-9001",
+      "ts": "2026-11-28T09:12:31+08:00",
+      "session_id": "s-20261128-0007",
+      "turn_no": 1,
+      "question": "近 30 天各渠道 GMV 是多少？",
+      "answer": "已按支付时间统计渠道 GMV，见 SQL。注意渠道取 dim_channel_df 的 channel_code。",
+      "sql_text": "SELECT channel_code, SUM(pay_amt) AS gmv FROM dwd_pay_flow_di WHERE dt BETWEEN 20261029 AND 20261127 GROUP BY channel_code",
+      "intent": "取数",
+      "tables": ["dwd_pay_flow_di", "dim_channel_df"],
+      "user_hash": "u_8f14e45fceea",
+      "model": "deepseek-chat",
+      "latency_ms": 2140
+    },
+    {
+      "qa_id": "Q20261128-9002",
+      "ts": "2026-11-28T09:13:05+08:00",
+      "session_id": "s-20261128-0007",
+      "turn_no": 2,
+      "question": "你刚才那个口径不对，我要的是下单 GMV，不是支付 GMV",
+      "answer": "明白，下单口径用 dwd_order_main_di 按 create_time 统计。两者不能混用：下单是应付，支付是实付。",
+      "follows_up_qa_id": "Q20261128-9001",
+      "intent": "口径确认",
+      "tables": ["dwd_order_main_di"],
+      "feedback": -1,
+      "feedback_note": "口径说错了",
+      "user_hash": "u_8f14e45fceea"
+    }
+  ]
+}

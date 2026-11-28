@@ -1,0 +1,45 @@
+{
+  "$id": "https://github.com/nino-laiqiu/data-warehouse-workflow/contracts/qa_ingest_request.schema.json",
+  "title": "问答采集请求（HTTP 批量接入）",
+  "description": "外部系统把分析师问答送进本工作流时使用的批量载荷。单条记录的形状见 qa_record.schema.json；本契约只定义外层信封与最小必填项，允许采集端携带未声明的扩展字段。",
+  "type": "object",
+  "required": ["version", "source", "records"],
+  "properties": {
+    "version": { "type": "string", "enum": ["1"] },
+    "source": {
+      "type": "string",
+      "minLength": 2,
+      "description": "采集端标识，例如 dsh-a-line / bi-portal / manual-export；落库时写进 qa_turn.model 旁边的采集来源"
+    },
+    "sent_at": { "type": "string", "description": "ISO8601，采集端发送时间，便于排查延迟" },
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "description": "单批上限 500 条：太大不好定位失败行，太小采集端要自己攒",
+      "items": {
+        "type": "object",
+        "required": ["qa_id", "ts", "session_id", "turn_no", "question", "answer"],
+        "properties": {
+          "qa_id": { "type": "string", "pattern": "^Q[0-9]{8}-[0-9]{4}$" },
+          "ts": { "type": "string" },
+          "session_id": { "type": "string", "minLength": 1 },
+          "turn_no": { "type": "integer", "minimum": 1 },
+          "question": { "type": "string", "minLength": 1 },
+          "answer": { "type": "string", "minLength": 1 },
+          "follows_up_qa_id": { "type": "string" },
+          "sql_text": { "type": "string" },
+          "intent": { "type": "string", "enum": ["取数", "分析", "口径确认", "排障", "其他"] },
+          "tables": { "type": "array", "items": { "type": "string" } },
+          "feedback": { "type": "integer", "enum": [-1, 0, 1] },
+          "feedback_note": { "type": "string" },
+          "user_hash": { "type": "string" },
+          "model": { "type": "string" },
+          "latency_ms": { "type": "integer", "minimum": 0 }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}
