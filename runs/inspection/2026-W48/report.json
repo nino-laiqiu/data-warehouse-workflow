@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-11-28T10:29:38+08:00",
+  "generated_at": "2026-11-28T10:40:27+08:00",
   "week": "2026-W48",
   "summary": {
-    "checks_total": 12,
-    "checks_passed": 12,
+    "checks_total": 14,
+    "checks_passed": 14,
     "score": 87,
     "block": 0
   },
@@ -53,6 +53,17 @@
       "group": "门禁",
       "cmd": [
         "./tools/check_wiki.py"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
+    },
+    {
+      "name": "知识变更登记",
+      "group": "门禁",
+      "cmd": [
+        "./tools/wiki_impact.py",
+        "--check"
       ],
       "optional": false,
       "ok": true,
@@ -138,6 +149,19 @@
       "optional": false,
       "ok": true,
       "reason": ""
+    },
+    {
+      "name": "留痕完整性 画像标签需求20261122",
+      "group": "门禁",
+      "cmd": [
+        "./tools/journal.py",
+        "check",
+        "--req",
+        "画像标签需求20261122"
+      ],
+      "optional": false,
+      "ok": true,
+      "reason": ""
     }
   ],
   "ontology": {
@@ -202,17 +226,21 @@
     "designed": 9
   },
   "knowledge": {
-    "files": 7,
-    "chunks": 6,
+    "files": 8,
+    "chunks": 8,
     "uncovered": [
-      "knowledge/04_踩坑/hive-partition-duplicate-column.md"
+      "knowledge/index.md"
     ]
   },
   "journals": {
     "requirements": [
       {
         "requirement": "画像标签需求20261122",
-        "events": 46,
+        "events": 50,
+        "open_todos": [
+          "T-20261128-01"
+        ],
+        "blocked_days": 0,
         "gates": {
           "G0": "pass",
           "G1": "pass",
@@ -230,12 +258,14 @@
         "anomalies": [
           "G5 未过但 G6 已过（门禁顺序倒挂）"
         ],
-        "last_ts": "2026-11-22T16:58:20+08:00"
+        "last_ts": "2026-11-28T10:37:24+08:00"
       }
     ]
   },
   "hygiene": {
-    "empty_dirs": []
+    "empty_dirs": [
+      "requirements/渠道GMV日报需求20261122/需求开发员"
+    ]
   },
   "problems": [
     {
@@ -246,7 +276,7 @@
     {
       "level": "hitl",
       "where": "画像标签需求20261122 · G5",
-      "detail": "未过门，需 H3 上线放行（已挂 5 天）"
+      "detail": "未过门，需 H3 上线放行（已挂 0 天）"
     },
     {
       "level": "gap",
@@ -262,13 +292,18 @@
       "level": "gap",
       "where": "知识索引",
       "detail": "1 个知识文件没有 chunk 索引"
+    },
+    {
+      "level": "info",
+      "where": "空目录",
+      "detail": "requirements/渠道GMV日报需求20261122/需求开发员"
     }
   ],
   "hitl_backlog": [
     {
       "level": "hitl",
       "where": "画像标签需求20261122 · G5",
-      "detail": "未过门，需 H3 上线放行（已挂 5 天）"
+      "detail": "未过门，需 H3 上线放行（已挂 0 天）"
     }
   ],
   "trend": {

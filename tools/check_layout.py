@@ -82,7 +82,10 @@ def main(argv: list[str]) -> int:
 
         # 5. 开发目录一旦开了，结构必须齐全
         dev = REQ_ROOT / actual_dir / "需求开发员"
-        if dev.exists():
+        if dev.exists() and not any(dev.iterdir()):
+            # 空目录只是"还没开工"（git 不跟踪空目录，reset 后也会留下空壳），不算错
+            warnings.append(f"[{req_id}] 开发目录是空的（需求还没进 P2）: {dev.relative_to(ROOT).as_posix()}")
+        elif dev.exists():
             for need in ("developer-1", "developer-2", "监督者"):
                 if not (dev / need).exists():
                     errors.append(f"[{req_id}] 开发目录缺 {need}/: {dev.relative_to(ROOT).as_posix()}")
