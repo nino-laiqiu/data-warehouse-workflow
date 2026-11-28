@@ -37,7 +37,7 @@ TYPES = {
 SUPPORTED_KEYWORDS = {
     "$schema", "$comment", "$id", "title", "description", "$ref", "definitions",
     "type", "required", "properties", "additionalProperties", "enum",
-    "pattern", "minLength", "minItems", "items",
+    "pattern", "minLength", "minItems", "items", "minimum", "maximum",
 }
 
 
@@ -84,6 +84,12 @@ def validate(value, schema: dict, root: dict, path: str = "$") -> list[str]:
             errs.append(f"{path}: {value!r} 不匹配 {schema['pattern']}")
         if "minLength" in schema and len(value) < schema["minLength"]:
             errs.append(f"{path}: 长度 {len(value)} < {schema['minLength']}")
+
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if "minimum" in schema and value < schema["minimum"]:
+            errs.append(f"{path}: {value} < 最小值 {schema['minimum']}")
+        if "maximum" in schema and value > schema["maximum"]:
+            errs.append(f"{path}: {value} > 最大值 {schema['maximum']}")
 
     if isinstance(value, list):
         if "minItems" in schema and len(value) < schema["minItems"]:

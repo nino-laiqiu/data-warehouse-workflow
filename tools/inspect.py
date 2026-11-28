@@ -102,6 +102,11 @@ def build_checks() -> list[dict]:
             add(f"留痕格式 {req.name}", "门禁",
                 py("tools", "validate_contracts.py") + [rel(f), "--lines",
                                                        "--schema", "contracts/journal_entry.schema.json"])
+        review_dir = norm / "_review"
+        if review_dir.exists():
+            for f in sorted(review_dir.glob("*.json")):
+                add(f"审阅状态 {f.stem}", "门禁",
+                    py("tools", "req_review.py") + ["check", "--req-id", f.stem])
         if (d / "journal.jsonl").exists():
             add(f"留痕完整性 {req.name}", "门禁",
                 py("tools", "journal.py") + ["check", "--req", req.name])

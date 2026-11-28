@@ -113,6 +113,8 @@ def main(argv: list[str]) -> int:
 
     # 3. REQ 文件位置
     for f in REQ_ROOT.rglob("REQ-*.md"):
+        if "_draft" in f.parts or "_review" in f.parts:
+            continue  # 草案与审阅状态不是正式产物
         rel = f.relative_to(ROOT).as_posix()
         parts = f.relative_to(REQ_ROOT).parts
         if parts[0] in SKIP_TOP:

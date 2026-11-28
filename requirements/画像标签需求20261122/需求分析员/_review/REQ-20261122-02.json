@@ -1,0 +1,122 @@
+{
+  "requirement_id": "REQ-20261122-02",
+  "doc": "requirements/画像标签需求20261122/需求分析员/REQ-20261122-02.md",
+  "status": "review",
+  "round": 0,
+  "questions": [
+    {
+      "id": "Q1",
+      "text": "是否复购：终身付过款 vs 仅近30天？现稿按终身",
+      "blocking": true,
+      "answer": "",
+      "answered_by": "",
+      "answered_at": "",
+      "asked_at": "2026-11-28T10:42:51+08:00"
+    },
+    {
+      "id": "Q2",
+      "text": "客单价档位分桶边界，及边界值归属",
+      "blocking": true,
+      "answer": "",
+      "answered_by": "",
+      "answered_at": "",
+      "asked_at": "2026-11-28T10:42:51+08:00"
+    },
+    {
+      "id": "Q3",
+      "text": "年龄段分桶边界与生日当天归属",
+      "blocking": true,
+      "answer": "",
+      "answered_by": "",
+      "answered_at": "",
+      "asked_at": "2026-11-28T10:42:52+08:00"
+    },
+    {
+      "id": "Q4",
+      "text": "性别缺失落未知，还是按品类推断？建议未知",
+      "blocking": true,
+      "answer": "",
+      "answered_by": "",
+      "answered_at": "",
+      "asked_at": "2026-11-28T10:42:52+08:00"
+    },
+    {
+      "id": "Q5",
+      "text": "偏好品类口径：近30天金额Top1；并列如何取舍",
+      "blocking": true,
+      "answer": "",
+      "answered_by": "",
+      "answered_at": "",
+      "asked_at": "2026-11-28T10:42:52+08:00"
+    },
+    {
+      "id": "Q6",
+      "text": "城市等级取最近收货地址还是注册城市？",
+      "blocking": true,
+      "answer": "",
+      "answered_by": "",
+      "answered_at": "",
+      "asked_at": "2026-11-28T10:42:52+08:00"
+    },
+    {
+      "id": "Q8",
+      "text": "输出形态：每日全量快照 还是 变更增量？",
+      "blocking": true,
+      "answer": "",
+      "answered_by": "",
+      "answered_at": "",
+      "asked_at": "2026-11-28T10:42:52+08:00"
+    },
+    {
+      "id": "Q9",
+      "text": "首单距今天数分桶边界",
+      "blocking": true,
+      "answer": "",
+      "answered_by": "",
+      "answered_at": "",
+      "asked_at": "2026-11-28T10:42:52+08:00"
+    },
+    {
+      "id": "Q11",
+      "text": "是否需要长表视图 v_user_profile_tag 供按标签名圈人",
+      "blocking": true,
+      "answer": "",
+      "answered_by": "",
+      "answered_at": "",
+      "asked_at": "2026-11-28T10:42:52+08:00"
+    },
+    {
+      "id": "Q7",
+      "text": "时区是否全按北京时间自然日切",
+      "blocking": false,
+      "answer": "",
+      "answered_by": "",
+      "answered_at": "",
+      "asked_at": "2026-11-28T10:42:52+08:00"
+    },
+    {
+      "id": "Q10",
+      "text": "测试账号过滤规则（is_test 还是 user_id 前缀）",
+      "blocking": false,
+      "answer": "",
+      "answered_by": "",
+      "answered_at": "",
+      "asked_at": "2026-11-28T10:42:52+08:00"
+    },
+    {
+      "id": "Q12",
+      "text": "首次上线是否回刷历史90天",
+      "blocking": false,
+      "answer": "",
+      "answered_by": "",
+      "answered_at": "",
+      "asked_at": "2026-11-28T10:42:53+08:00"
+    }
+  ],
+  "rounds": [],
+  "created": "2026-11-28T10:42:29+08:00",
+  "updated": "2026-11-28T10:42:53+08:00",
+  "base_confirmed": true,
+  "base_note": "v1 稿被 P2–P6 实际使用（REQ-20261122-02 已跑到 P6），作为基线；但人从未逐条确认，本轮 v2 就是对它的复核。",
+  "draft": "requirements/画像标签需求20261122/需求分析员/_draft/REQ-20261122-02.md"
+}

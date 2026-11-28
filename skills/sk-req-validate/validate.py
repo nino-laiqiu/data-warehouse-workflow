@@ -87,6 +87,31 @@ def main(argv: list[str]) -> int:
     errors: list[str] = []
     warnings: list[str] = []
 
+    # 0. 审阅状态：草稿/复核中的翻译稿不算过门（状态由 tools/req_review.py 管）
+    for rid in sorted(set(REQ_RE.findall(text))):
+        st_file = doc_path.parent / "_review" / f"{rid}.json"
+        if doc_path.parent.name == "_draft":
+            errors.append(f"这是草案（{doc_path.parent.name}/），不是正式翻译稿——确认后用 req_review.py promote")
+        elif st_file.exists():
+            st = json.loads(st_file.read_text(encoding="utf-8"))
+            status = st.get("status")
+            if status == "draft":
+                errors.append(f"审阅状态是 draft（初稿，没和人过过一轮），不许进 P2"
+                              f"（{st_file.relative_to(root).as_posix()}）")
+            elif status == "review" and not st.get("base_confirmed"):
+                errors.append("审阅状态是 review 且没有已确认的基线版本——等于没有可开工的稿子")
+            elif status == "review":
+                warnings.append("复核中：存在一版已确认基线，本轮修订未定稿")
+            elif status != "confirmed":
+                errors.append(f"审阅状态非法: {status}")
+            if status == "confirmed":
+                open_q = [q["id"] for q in st.get("questions", [])
+                          if q.get("blocking") and not q.get("answer")]
+                if open_q:
+                    errors.append(f"已确认但还有未回答的阻断问题: {', '.join(open_q)}")
+        else:
+            warnings.append(f"没有审阅状态文件（历史稿，按已确认处理）: {rid}")
+
     sections = split_sections(text)
     for i, kw in enumerate(REQUIRED_SECTIONS, 1):
         if i not in sections:
@@ -154,6 +179,8 @@ def main(argv: list[str]) -> int:
         print(f"{doc_path.name}: {len(sections)}/8 段")
         for e in errors:
             print(f"  [FAIL] {e}")
+        for w in warnings:
+            print(f"  [WARN] {w}")
         print("PASS：翻译稿可开工（G1）" if not errors else f"FAIL：{len(errors)} 个问题")
     return 0 if not errors else 1
 
