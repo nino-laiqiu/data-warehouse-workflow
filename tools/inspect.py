@@ -149,7 +149,13 @@ def ontology_stats() -> dict:
 
 
 def skill_stats() -> dict:
-    impl = sorted(p.name for p in (ROOT / "skills").iterdir() if (p / "SKILL.md").exists())
+    impl, spec = [], []
+    for d in sorted((ROOT / "skills").iterdir()):
+        md = d / "SKILL.md"
+        if not md.exists():
+            continue
+        head = md.read_text(encoding="utf-8")[:400]
+        (spec if "status: spec" in head else impl).append(d.name)
     pipe = ROOT / "flow" / "pipeline.yaml"
     refs: set[str] = set()
     order: dict[str, int] = {}
@@ -165,7 +171,8 @@ def skill_stats() -> dict:
     pending = sorted((r for r in refs if not (ROOT / "skills" / r / "SKILL.md").exists()),
                      key=lambda s: (order.get(s, 999), s))
     orphan = sorted(set(impl) - refs)
-    return {"implemented": impl, "referenced": sorted(refs), "pending": pending, "orphan": orphan}
+    return {"implemented": impl, "spec_only": spec, "referenced": sorted(refs),
+            "pending": pending, "orphan": orphan}
 
 
 def contract_stats() -> dict:
@@ -330,6 +337,10 @@ def collect() -> dict:
         problems.append({"level": "stale", "where": f, "detail": "status: draft 超过 90 天，需复审判定"})
     if sk["pending"]:
         problems.append({"level": "gap", "where": "技能", "detail": f"{len(sk['pending'])} 个技能被工作流引用但未实现: " + ", ".join(sk["pending"])})
+    if sk.get("spec_only"):
+        problems.append({"level": "info", "where": "技能",
+                         "detail": f"{len(sk['spec_only'])} 个技能只有规格（status: spec），实现待排期: "
+                                   + ", ".join(sk["spec_only"])})
     if ct["missing"]:
         problems.append({"level": "gap", "where": "契约", "detail": f"缺 {len(ct['missing'])} 个设计契约: " + ", ".join(ct["missing"])})
     if kn["uncovered"]:

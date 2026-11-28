@@ -105,3 +105,13 @@ owner: model-designer
 
 技能判据、排期与「为什么现在不实现」，见 [../docs/技能清单.md](../docs/技能清单.md)。
 本文件只负责调用约定与目录规范，不重复维护清单。
+
+## 三种状态（2026-11-28 起）
+
+| 状态 | front matter | 文件 | 巡检怎么算 |
+|---|---|---|---|
+| 已实现 | `status: implemented` | SKILL.md + schema.json + validate.py | 资产 |
+| 有规格 | `status: spec` | 只有 SKILL.md（写清何时调用/输入输出/判据/失败处理） | 不算缺口，只报 info |
+| 缺失 | — | 只有被 pipeline 引用的名字 | gap |
+
+`unbound: true` = 不绑 stage 的旁路技能（`sk-spec-align`），不算死技能。
